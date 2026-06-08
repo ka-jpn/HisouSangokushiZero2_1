@@ -1,6 +1,7 @@
 ﻿using HisouSangokushiZero2_1_Uno.Code;
 using HisouSangokushiZero2_1_Uno.Data;
 using HisouSangokushiZero2_1_Uno.MyUtil;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -11,7 +12,8 @@ using System.Linq;
 using Uno.Extensions.Specialized;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
 namespace HisouSangokushiZero2_1_Uno.Pages;
-internal record SaveSlotData(int SlotIndex,string GameVersion,string? NowScenario,string? PlayCountry,string? PlayTurn,string? PlayTime,string? LastSaveDate,string? HasSaveData);
+internal record SaveSlotData(int SlotIndex,SaveSlotMetaData? MetaData,string? SaveInfoText,Visibility DeleteButtonVisibility);
+internal record SaveSlotMetaData(string GameVersion,string? NowScenario,string? PlayCountry,string? PlayTurn,string TotalPlayTime,string LastSaveDate);
 public sealed partial class SaveAndLoad:UserControl {
   internal const double minScaleFactor = 0.65;
   internal const double scrollMaxWidth = UIUtil.fixModeMaxWidth * minScaleFactor;
@@ -21,6 +23,7 @@ public sealed partial class SaveAndLoad:UserControl {
   private static List<ReadMeta> saveSlots = [];
   private static List<bool> hasSaveDataList = [];
   internal static readonly ObservableCollection<SaveSlotData> saveSlotTexts = [];
+  private static readonly int saveSlotNum = 10;
   internal SaveAndLoad() {
     InitializeComponent();
     MyInit(this);
@@ -32,28 +35,27 @@ public sealed partial class SaveAndLoad:UserControl {
   private static async Task RefreshSaveSlotView() {
     hasSaveDataList = await Storage.GetHasSaveDataList();
     saveSlots = await Storage.ReadMetaDataList();
-    saveSlotTexts.Clear();
-    Enumerable.Range(0,10).ToList().ForEach(index => {
-      (saveSlots.ElementAtOrDefault(index)?.ReadState == ReadState.Read && saveSlots.ElementAtOrDefault(index)?.MaybeMeta is MetaData meta ? new SaveSlotData(
+    IEnumerable<SaveSlotData> newSaveSlotTexts = Enumerable.Range(0,saveSlotNum).Select(index => 
+      saveSlots.ElementAtOrDefault(index)?.ReadState == ReadState.Read && saveSlots.ElementAtOrDefault(index)?.MaybeMeta is MetaData meta ? new SaveSlotData(
         SlotIndex: index,
-        GameVersion: $"ゲームバージョン：{meta.GameVersion}",
-        NowScenario: $"シナリオ：{meta.NowScenario?.Value}",
-        PlayCountry: $"プレイ国名：{meta.PlayCountry?.ToString() ?? "(選択前)"}",
-        PlayTurn: $"ターン数：{meta.PlayTurn?.ToString() ?? "(開始前)"}",
-        PlayTime: $"プレイ時間：{Math.Floor(meta.TotalPlayTime.TotalMinutes)}分",
-        LastSaveDate: $"最終保存：{meta.LastSaveDate:yyyy/MM/dd HH:mm}",
-        HasSaveData: null
+        MetaData: new SaveSlotMetaData(
+          GameVersion: $"ゲームバージョン：{meta.GameVersion}",
+          NowScenario: $"シナリオ：{meta.NowScenario?.Value}",
+          PlayCountry: $"プレイ国名：{meta.PlayCountry?.ToString() ?? "(選択前)"}",
+          PlayTurn: $"ターン数：{meta.PlayTurn?.ToString() ?? "(開始前)"}",
+          TotalPlayTime: $"プレイ時間：{Math.Floor(meta.TotalPlayTime.TotalMinutes)}分",
+          LastSaveDate: $"最終保存：{meta.LastSaveDate:yyyy/MM/dd HH:mm}"
+        ),
+        SaveInfoText: null,
+        DeleteButtonVisibility: Visibility.Visible
       ) : new SaveSlotData(
         SlotIndex: index,
-        GameVersion: string.Empty,
-        NowScenario: null,
-        PlayCountry: null,
-        PlayTurn: null,
-        PlayTime: null,
-        LastSaveDate: null,
-        HasSaveData: hasSaveDataList.ElementAtOrDefault(index) ? "セーブデータがありますがここに表示されるメタデータがありません\n(再保存でメタデータが付加されます)" : "セーブデータなし"
-      )).MyApply(saveSlotTexts.Add);
-    });
+        MetaData: null,
+        SaveInfoText: hasSaveDataList.ElementAtOrDefault(index) ? "セーブデータがありますがここに表示されるメタデータがありません\n(再保存でメタデータが付加されます)" : "セーブデータなし",
+        DeleteButtonVisibility: Visibility.Collapsed
+      )
+    );
+    saveSlotTexts.MyApply(v => v.Clear()).MyApply(v => newSaveSlotTexts.ToList().ForEach(v.Add));
   }
   private static int IndexToFileNo(int index) => index + 1;
   internal static async Task Show(SaveAndLoad page,bool isWrite,Action<ReadGame?> afterProcess,Action closeProcess,Windows.Foundation.Size parentSize) {
@@ -77,10 +79,20 @@ public sealed partial class SaveAndLoad:UserControl {
     async Task PressSaveSlot(SaveSlotData slotData) {
       await (isWritemode ? WriteSlot() : ReadSlot());
       async Task WriteSlot(){
-        await Storage.WriteStorageData(GameData.game,GameData.startingPlayTotalTime,IndexToFileNo(slotData.SlotIndex));
-        await Task.Yield();
-        await RefreshSaveSlotView();
-        pressSlotAfterProcess(null);
+        if(slotData.MetaData is not null) {
+          CreateConfirmPanel([$"スロット{IndexToFileNo(slotData.SlotIndex)}にはすでにセーブデータが存在します","上書きしますか？"], async () => {
+            await WriteGameData();
+          });
+        } else {
+          await WriteGameData();
+        }
+        async Task WriteGameData() {
+          await Storage.WriteStorageData(GameData.game,GameData.startingPlayTotalTime,IndexToFileNo(slotData.SlotIndex));
+          await Task.Yield();
+          await RefreshSaveSlotView();
+          pressSlotAfterProcess(null);
+          GrayoutPanel.Visibility = Visibility.Collapsed;
+        }
       }
       async Task ReadSlot(){
         if (hasSaveDataList.ElementAtOrDefault(slotData.SlotIndex)) {
@@ -89,5 +101,27 @@ public sealed partial class SaveAndLoad:UserControl {
         }
       }
     }
+  }
+  private async void SaveSlot_DeleteButtonClick(object sender,RoutedEventArgs e) {
+    if (sender is Button button && button.DataContext is SaveSlotData slotData) {
+      CreateConfirmPanel(["セーブデータを削除しますか？"], async () => {
+        await Storage.DeleteStorageData(IndexToFileNo(slotData.SlotIndex));
+        await Task.Yield();
+        await RefreshSaveSlotView();
+      });
+    }
+  }
+  private void CreateConfirmPanel(IEnumerable<string> texts,Action yesAction) {
+    ConfirmPanel.MySetChildren([
+      ..texts.Select(text => new TextBlock { Text = text, HorizontalAlignment = HorizontalAlignment.Center }),
+      new StackPanel { Height = 20 },
+      new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center }.MySetChildren([
+        CreateButton().MySetChild(new TextBlock { Text = "はい" }).MyApply(v => v.Click += (_, _) => { yesAction(); GrayoutPanel.Visibility = Visibility.Collapsed; }),
+        new StackPanel { Width = 20 },
+        CreateButton().MySetChild(new TextBlock { Text = "いいえ" }).MyApply(v => v.Click += (_, _) => GrayoutPanel.Visibility = Visibility.Collapsed)
+      ])
+    ]);
+    GrayoutPanel.Visibility = Visibility.Visible;
+    Button CreateButton() => new(){ Width = 100, Height = 40,Background = new Color(68,0,0,0).ToBrush() };
   }
 }

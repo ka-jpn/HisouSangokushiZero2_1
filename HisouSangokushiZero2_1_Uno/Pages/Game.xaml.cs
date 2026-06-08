@@ -610,10 +610,10 @@ public sealed partial class Game:Page {
     Dictionary<string,bool?> winCondMap = game.PlayCountry?.MyPipe(v => game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.WinConditionMap.GetValueOrDefault(v))?.ProgressExplainFunc(game) ?? [];
     StackPanel panel = new StackPanel() { Background = Windows.UI.Color.FromArgb(187,255,255,255),IsHitTestVisible = false }.MySetChildren([
       new TextBlock() { Text = Text.WinCondCaptionText(game) },
-        .. winCondMap.Select(winCond => new StackPanel(){ Orientation = Orientation.Horizontal }.MySetChildren([
-          new Grid(){ Width = BasicStyle.fontsize }.MySetChildren(winCond.Value is bool isClearCond? [..UIUtil.CreateWithShadow(() => CreateWinCondCheckText(isClearCond),shadowWidth,Colors.Black)]:[]),
-          new TextBlock() { Text = winCond.Key }
-        ]))
+      .. winCondMap.Select(winCond => new StackPanel(){ Orientation = Orientation.Horizontal }.MySetChildren([
+        new Grid(){ Width = BasicStyle.fontsize }.MySetChildren(winCond.Value is bool isClearCond? [..UIUtil.CreateWithShadow(() => CreateWinCondCheckText(isClearCond),shadowWidth,Colors.Black)]:[]),
+        new TextBlock() { Text = winCond.Key }
+      ]))
     ]);
     TurnWinCondPanel.MySetChildren([panel]);
     RescaleTurnWinCondPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * GetZoomFactor());

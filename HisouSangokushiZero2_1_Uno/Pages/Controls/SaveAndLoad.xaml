@@ -14,27 +14,45 @@
     <ListView x:Name="Scroll" Grid.Row="1" MaxWidth="{x:Bind local:SaveAndLoad.scrollMaxWidth}" HorizontalAlignment="Stretch" ItemsSource="{x:Bind local:SaveAndLoad.saveSlotTexts,Mode=OneWay}">
       <ListView.ItemTemplate>
         <DataTemplate x:DataType="local:SaveSlotData">
-          <StackPanel Orientation="Horizontal" Background="#FFF" Margin="2" PointerPressed="SaveSlot_PointerPressed">
-            <TextBlock Text="{x:Bind local:SaveAndLoad.IndexToFileNo(SlotIndex)}" FontSize="36" LineHeight="42" Width="60" TextAlignment="Center" VerticalAlignment="Center"/>
-            <StackPanel Margin="0,2,-50,-2" VerticalAlignment="Center">
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{x:Bind NowScenario}" Margin="10,0"/>
-                <TextBlock Text="{x:Bind PlayCountry}" Margin="10,0"/>
-                <TextBlock Text="{x:Bind PlayTurn}" Margin="10,0"/>
-              </StackPanel>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{x:Bind PlayTime}" Margin="10,0"/>
-                <TextBlock Text="{x:Bind LastSaveDate}" Margin="10,0"/>
-                <TextBlock Text="{x:Bind GameVersion}" Margin="10,0"/>
-              </StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Background="#FFF" Margin="2" PointerPressed="SaveSlot_PointerPressed">
+              <TextBlock Text="{x:Bind local:SaveAndLoad.IndexToFileNo(SlotIndex)}" FontSize="36" LineHeight="42" Width="60" TextAlignment="Center" VerticalAlignment="Center"/>
+              <Grid VerticalAlignment="Center">                
+                <StackPanel>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind  MetaData.NowScenario}"/>
+                    <StackPanel Width="10"/>
+                    <TextBlock Text="{x:Bind MetaData.PlayCountry}"/>
+                    <StackPanel Width="10"/>
+                    <TextBlock Text="{x:Bind MetaData.PlayTurn}"/>
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind MetaData.TotalPlayTime}"/>
+                    <StackPanel Width="10"/>
+                    <TextBlock Text="{x:Bind MetaData.LastSaveDate}"/>
+                    <StackPanel Width="10"/>
+                    <TextBlock Text="{x:Bind MetaData.GameVersion}"/>
+                  </StackPanel>
+                </StackPanel>
+                <TextBlock Text="{x:Bind SaveInfoText}" VerticalAlignment="Center"/>
+              </Grid>
             </StackPanel>
-            <TextBlock Text="{x:Bind HasSaveData}" VerticalAlignment="Center"/>
-          </StackPanel>
+            <Button Grid.Column="1" Background="#FAA" VerticalAlignment="Stretch" Margin="2" Click="SaveSlot_DeleteButtonClick" Visibility="{x:Bind DeleteButtonVisibility}">
+              <TextBlock Margin="8" Text="削除"/>
+            </Button>
+          </Grid>
         </DataTemplate>
       </ListView.ItemTemplate>
     </ListView>
     <Button x:Name="CloseButton" Grid.Row="2" MaxWidth="350" Height="60" Margin="5" HorizontalAlignment="Stretch">
       <TextBlock Text="閉じる"/>
     </Button>
+    <Grid x:Name="GrayoutPanel" Grid.Row="0" Grid.RowSpan="3" Background="#CCCC" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed">
+      <StackPanel x:Name="ConfirmPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFF" Padding="20"/>
+    </Grid>
   </Grid>
 </UserControl>

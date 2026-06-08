@@ -37,9 +37,9 @@ internal static class Storage {
     };
   }
   internal static async Task DeleteStorageData(int fileNo) {
-    File.Delete(Path.Combine(GetStorageFolder().Path, BaseData.name.Value, CreateSaveFileName(fileNo)));
-    File.Delete(Path.Combine(GetStorageFolder().Path, CreateMetaFileName(fileNo)));
-    File.Delete(Path.Combine(GetStorageFolder().Path, CreateSaveFileName(fileNo)));
+    Path.Combine(GetStorageFolder().Path, BaseData.name.Value, CreateSaveFileName(fileNo)).MyApply(filePath => (File.Exists(filePath) ? File.Delete : (Action<string>)(_ => { })).Invoke(filePath));
+    Path.Combine(GetStorageFolder().Path, CreateMetaFileName(fileNo)).MyApply(filePath => (File.Exists(filePath) ? File.Delete : (Action<string>)(_ => { })).Invoke(filePath));
+    Path.Combine(GetStorageFolder().Path, CreateSaveFileName(fileNo)).MyApply(filePath => (File.Exists(filePath) ? File.Delete : (Action<string>)(_ => { })).Invoke(filePath));
   }
   internal static async Task<List<ReadMeta>> ReadMetaDataList() {
     List<StorageFile> newMetaFiles = await GetStorageFolder().MyPipe(GetFilesAsync);
