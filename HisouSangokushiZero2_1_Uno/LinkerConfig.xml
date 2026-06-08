@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="HisouSangokushiZero2_1_Uno" />
+	<!--
+	<assembly fullname="System.Core">
+		<type fullname="System.Linq.Expressions*" />
+	</assembly>
+	-->
+</linker>

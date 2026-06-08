@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" ?>
+<UserControl
+  x:Class="HisouSangokushiZero2_1_Uno.Pages.Explain"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <StackPanel x:Name="ContentPanel" Padding="2">
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="勝利・敗北について" HorizontalAlignment="Center"/>
+      <StackPanel HorizontalAlignment="Center">
+        <TextBlock Text="勝利条件：陣営勝利条件を一番乗りで達成(達成勝利) or ゲーム終了年春まで存続(存続勝利)"/>
+        <TextBlock Text="敗北条件：プレイヤー勢力領土全失陥(滅亡敗北) or 陣営勝利条件をCPUに先に達成される(他陣営達成勝利敗北)"/>
+      </StackPanel>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="陣営の軍議・行動フェイズ順について" HorizontalAlignment="Center"/>
+      <TextBlock Text="フェイズは並行して実行されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="ただし攻撃先地域が競合した場合は総内政値が小さい陣営から戦闘権を得ます" HorizontalAlignment="Center"/>
+      <TextBlock Text="NPC勢力は他の勢力のフェイズを参照せずにフェイズ内容を決定し、プレイヤーを特別視しません" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="プレイヤーの軍議フェイズについて" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物の配置移動と侵攻の指令ができます、フェイズ内であれば指令しなおせます" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物の配置は首都に接続している自領土内で移動できます、距離の制限はありません" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻の指令ができるのは首都に接続している自領土に隣接している他国の地域および自治領です" HorizontalAlignment="Center"/>
+      <TextBlock Text="「軍議終了」ボタンをクリックで戦略フェイズを確定して進行します" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="侵攻の指令について" HorizontalAlignment="Center"/>
+      <TextBlock Text="[国力回復時]" HorizontalAlignment="Center"/>
+      <TextBlock Text="指令ができず防衛専念状態にもなりません(人物の配置換えとターン終了のみ実行可能)" HorizontalAlignment="Center"/>
+      <TextBlock Text="[行動可能時]" HorizontalAlignment="Center"/>
+      <TextBlock Text="隣接他国領土をクリック：「資金が足りればその地域に侵攻、足りなければ防衛専念」を指令にします" HorizontalAlignment="Center"/>
+      <TextBlock Text="自国領土をクリック：「防衛専念(防御ランク補正+1)」を指令にします" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="人物の配置について" HorizontalAlignment="Center"/>
+      <StackPanel HorizontalAlignment="Center">
+        <TextBlock Text="中枢：筆頭と次席の能力により確率で自動で登用が行われます"/>
+        <TextBlock Text="内政：筆頭と次席の能力により内政効率が上がり、税収と内政値上昇に寄与します、地域の内政担当にもできます"/>
+        <TextBlock Text="防衛：筆頭と次席の能力により首都の防衛に能力を発揮します、地域の防衛担当にもできます"/>
+        <TextBlock Text="侵攻：筆頭と次席の能力により侵攻時に能力を発揮し、相手の防衛官との能力差による優劣が乱数による判定に影響します"/>
+      </StackPanel>
+      <TextBlock Text="筆頭と次席以外の中央のポストはストック扱いで能力の発揮はされません" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都について" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都は領土内で内政値が一番高い土地に自動で設定されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都の内政値は1.5倍の値として総内政値(収入計算に寄与)に計算されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都を攻められたときは中央の防衛官が迎撃、敗れれば首都エリアの防衛官が防衛の戦闘になります" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都陥落時には中央所属(それぞれの地域にいる防衛官・内政官以外)の将がそれぞれ50%の確率で戦死します" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="戦闘の判定について" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻と首都防衛は(筆頭ランク+次席ランク/2) が合計のランクになります" HorizontalAlignment="Center"/>
+      <TextBlock Text="戦闘時のランクおよび乱数(0以上~100未満)と結果" HorizontalAlignment="Center"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2.5,0,5">
+        <StackPanel>
+          <TextBlock Text="攻撃側-防御側" HorizontalAlignment="Center" Height="15"/>
+          <Grid x:Name="BattleExplainCaption" Height="150">
+            <StackPanel VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                <TextBlock Text="攻撃側大勝" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <Grid x:Name="AttackCrushFillColor" Width="10" Height="10" Margin="2"/>
+                <Grid x:Name="AttackCrushEdgeColor" Width="10" Height="10" Margin="2"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                <TextBlock Text="攻撃側辛勝" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <Grid x:Name="AttackWinFillColor" Width="10" Height="10" Margin="2"/>
+                <Grid x:Name="AttackWinEdgeColor" Width="10" Height="10" Margin="2"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                <TextBlock Text="攻撃側惜敗" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <Grid x:Name="AttackLoseFillColor" Width="10" Height="10" Margin="2"/>
+                <Grid x:Name="AttackLoseEdgeColor" Width="10" Height="10" Margin="2"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                <TextBlock Text="攻撃側大敗" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                <Grid x:Name="AttackRoutFillColor" Width="10" Height="10" Margin="2"/>
+                <Grid x:Name="AttackRoutEdgeColor" Width="10" Height="10" Margin="2"/>
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+        <StackPanel Padding="5,0">
+          <Canvas x:Name="AttackRankDiffTextPanel" Margin="0,6.25,0,15"/>
+          <Grid x:Name="AttackJudgeExplainPanel" MaxWidth="650" Height="400">
+            <Polygon x:Name="AttackCrushShape"/>
+            <Polygon x:Name="AttackWinShape"/>
+            <Polygon x:Name="AttackLoseShape"/>
+            <Polygon x:Name="AttackRoutShape"/>
+            <Canvas x:Name="AttackJudgeThresholdPointPanel"/>
+          </Grid>
+        </StackPanel>
+      </StackPanel>
+      <StackPanel HorizontalAlignment="Center">
+        <TextBlock Text="攻撃側大勝 … 防御側陥落、防御側将確率25%で戦死"/>
+        <TextBlock Text="攻撃側辛勝 … 防御側陥落、攻撃側次ターン国力回復(休み)"/>
+        <TextBlock Text="攻撃側惜敗 … 防御側撃退成功、攻撃側次ターン国力回復(休み)"/>
+        <TextBlock Text="攻撃側大敗 … 防御側撃退成功、攻撃側次3ターン国力回復(休み)、攻撃側将それぞれ確率25%で戦死"/>
+      </StackPanel>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="人物の登場期間について" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物は首都中枢担当に登用されると陣営に加わります" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された没年以降に生存していたら確率で死去し陣営から抜けます" HorizontalAlignment="Center"/>
+      <TextBlock Text="没年前にも防衛失敗や攻撃失敗で戦死することがあります" HorizontalAlignment="Center"/>
+      <TextBlock Text="ターンごとの死去判定の確率" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年 春 ・・・ (1/40)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年 夏 ・・・ (1/39)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年 秋 ・・・ (1/38)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年 冬 ・・・ (1/37)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+1年 春 ・・・ (1/36)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="・" HorizontalAlignment="Center"/>
+      <TextBlock Text="・" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+9 春 ・・・ (1/4)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+9 夏 ・・・ (1/3)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+9 秋 ・・・ (1/2)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+9 冬 ・・・ (1/1)*(年齢/60)" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物に設定された死去年+10年 ・・・ 1 (必ず死去)" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都中枢担当人物による登用について" HorizontalAlignment="Center"/>
+      <TextBlock Text="データがある人物の登用、いなければ無名人物の登用が行われます" HorizontalAlignment="Center"/>
+      <TextBlock Text="データがある人物は秋ターンに担当人物の能力に関係なく確実に登用され、陣営に追加されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="無名人物は (筆頭ランク+次席ランク/2+1)/30 の確率で毎ターンの始めに成功判定され、陣営に追加されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="基本的に無名人物はランク1ですが、まれにランク2が出現することがあります" HorizontalAlignment="Center"/>
+      <TextBlock Text="登用された人物が配置できるポストがない場合、配置できるようになるまで人物駒の出現は延期されます" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都内政担当人物による内政について" HorizontalAlignment="Center"/>
+      <TextBlock Text="(筆頭ランク+次席ランク/2)/5+1 が陣営の内政力となり、総内政値による税収と内政上昇値に乗算されます" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="地域担当人物による内政について" HorizontalAlignment="Center"/>
+      <TextBlock Text="対象地域内政担当の人物ランク×陣営の内政力/内政難度 がその地域のターン更新時の内政上昇値となります" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="内政難度について" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土数の0.5乗が内政難度となります、領土が広がるとデバフとなることを表現しています" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="収支計算について" HorizontalAlignment="Center"/>
+      <TextBlock Text="軍資金税収+資本注入 が収入、民政費+内政費+俸禄費 が支出となります" HorizontalAlignment="Center"/>
+      <TextBlock Text="軍資金税収は総内政値×内政力/内政難度、資本注入は10/領土数、" HorizontalAlignment="Center"/>
+      <TextBlock Text="民政費は(1-0.9^内政難度)×総内政値/内政難度、内政費は地域内政担当の人物ランク合計×2、" HorizontalAlignment="Center"/>
+      <TextBlock Text="俸禄費は陣営所属の人物ランク合計×0.1に加えて筆頭が1、次席が0.5、地域内政担当と地域防衛担当が0.5です" HorizontalAlignment="Center"/>
+      <TextBlock Text="ターン更新時に 収入-支出 が資金に合計されます" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="侵攻出撃費用について" HorizontalAlignment="Center"/>
+      <TextBlock Text="(筆頭ランク+次席ランク/2+1)×50が出撃費用となり、資金が足りている時のみ侵攻できます" HorizontalAlignment="Center"/>
+      <TextBlock Text="資金が足りていない場合は実行されず、防衛専念と同じ扱いになります(ペナルティなし)" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="内政値・内政上限値について" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土に「(現内政値)/(内政上限値)」表記があり、表記は小数点以下切捨てですが小数点以下4桁まで計算されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政上限値は毎ターン少量増加し(×100.1%+0.01)現内政値が上回ることはできません" HorizontalAlignment="Center"/>
+      <TextBlock Text="他のエリアに侵攻する際に自領土の各エリアの内政値が1%低下します" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻され領有が変わると現内政値が90%、内政上限値が95%になります" HorizontalAlignment="Center"/>
+      <TextBlock Text="防衛成功した場合は現内政値が95%(内政上限値は変更なし)になります" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="中華領域について" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物配置枠が黄色っぽくなっているのが中華領域で、勝利条件に絡みます" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="助力について" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物を元々の役割でない役割に割り当てることができます、ただし発揮するランクが1つ下がります" HorizontalAlignment="Center"/>
+      <TextBlock Text="元々の役割に戻すと発揮するランクも戻ります" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="道の種類と太さについて" HorizontalAlignment="Center"/>
+      <TextBlock Text="陸路/水路、および３種類の太さが設定されていますが、現バージョンでは見た目だけの違いです" HorizontalAlignment="Center"/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

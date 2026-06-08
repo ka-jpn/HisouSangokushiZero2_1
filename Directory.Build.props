@@ -1,0 +1,36 @@
+<Project>
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!--
+      Adding NoWarn to remove build warnings
+      NU1507: Warning when there are multiple package sources when using CPM with no source mapping
+      NETSDK1201: Warning that specifying RID won't create self containing app
+      PRI257: Ignore default language (en) not being one of the included resources (eg en-us, en-uk)
+    -->
+    <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257</NoWarn>
+    <UnoSplashScreenFile>Assets\Splash\splash_screen.svg</UnoSplashScreenFile>
+    <UnoSplashScreenColor>#DDE</UnoSplashScreenColor>
+    <UnoDragDropExternalSupport>false</UnoDragDropExternalSupport>
+    <UnoXamlResourcesTrimming>true</UnoXamlResourcesTrimming>
+    <WasmShellILLinkerEnabled>true</WasmShellILLinkerEnabled>
+    <PublishTrimmed>true</PublishTrimmed>
+    <!-- ビルド時の明示的オプション指定に変更
+    <WasmEnableAOT>true</WasmEnableAOT>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
+    <WasmShellEnableSkia>true</WasmShellEnableSkia>
+    <SatelliteResourceLanguages>None</SatelliteResourceLanguages>
+    <UnoDefaultFont>None</UnoDefaultFont>
+  </PropertyGroup>
+  <ItemGroup>
+    <UnoIcon Include="Assets\Icons\icon.svg" />
+    <EmbeddedResource Include="Platforms\WebAssembly\WasmCSS\myStyle.css" />
+    <EmbeddedResource Include="Platforms\WebAssembly\WasmScripts\myScript.js" />
+    <LinkerDescriptor Include="LinkerConfig.xml" />
+    <WasmShellMonoEnvironment Include="MONO_GC_PARAMS" Value="nursery-size=64m,major=marksweep,soft-heap-limit=256m" />
+  </ItemGroup>
+</Project>

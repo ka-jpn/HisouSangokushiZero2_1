@@ -1,0 +1,7 @@
+.uno-loader .logo {
+  max-width: min(95%, 600px);
+  max-height: min(95%, 600px);
+}
+.uno-loader progress {
+  height: 15%;
+}

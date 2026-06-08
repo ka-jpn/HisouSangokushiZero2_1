@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" ?>
+<UserControl 
+  x:Class="HisouSangokushiZero2_1_Uno.Pages.AdditionalNote"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Grid Background="#EEE">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="0" Height="30">
+      <TextBlock Text="補記" FontSize="20" LineHeight="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <Button x:Name="CloseButton" Width="35" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#2F00">
+        <TextBlock Text="×" FontWeight="Bold" FontSize="25" LineHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Button>
+    </Grid>
+    <Grid Grid.Row="1" Padding="5,0,5,5">
+      <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFF">
+        <StackPanel x:Name="ContentPanel" Padding="2">
+          <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="・人物の姓名について"/>
+            <TextBlock Text="北匈奴の呼衍は、呼衍王との呼称が確認できますが、調べると呼衍は姓とのことで、名が不明です"/>
+            <TextBlock Text="しかし北匈奴の人物が不足しているため、姓名としては不完全ながら、姓だけのデータとして登場人物に含めました"/>
+            <TextBlock Text="南蛮の朶思大王と木鹿大王は、演義の架空人物であることもあり、姓名としての情報がありません"/>
+            <TextBlock Text="しかし南蛮の人物拡充を考え、姓名のデータとしては不完全ながら、登場人物に含めました"/>
+            <TextBlock Text="沃沮の夫租王と沃沮王は、相当する人物の名前が不明で、また意味合いも同じです"/>
+            <TextBlock Text="勢力の呼称として夫租から沃沮に時代を経て変わっており、史料からこの時代の沃沮の人名を探し出せなかったため"/>
+            <TextBlock Text="人物拡充のため姓名が不明ながら、別表記の別人物として登場人物に含めました"/>
+            <TextBlock Text="琉球の琉球王は、この時代に勢力として琉球と呼ばれている訳ではないようで、また相当する人物の名前も不明です"/>
+            <TextBlock Text="琉球勢力を登場させた都合上、史料にはこの時代の人名が残っていないので、姓名が不明ながら登場人物に含めました"/>
+            <TextBlock Text="濊の濊王は、相当する人物の名前が不明で、また史料からはそもそも王がいない連合と見ることもできます"/>
+            <TextBlock Text="史料からこの時代の濊の人名を探し出せなかったため、国家としての構成や姓名が不明ながら登場人物に含めました"/>
+            <StackPanel Height="10"/>
+            <TextBlock Text="・人物の生没年/登場時期について"/>
+            <TextBlock Text="多くの人物について不明確であるため、登場時期や生没年をコーエーのデータから引用、もしくは推定が多いです"/>
+            <TextBlock Text="できる限り精度の高い情報元の収集や論拠ある推定を目指していますが、不備不足もあることご理解いただきたいです"/>
+            <TextBlock Text="データがなく、重要度が低いと判断した一部の人物の生没年は５年刻みを基準としています"/>
+            <StackPanel Height="10"/>
+            <TextBlock Text="・陣営について"/>
+            <TextBlock Text="劉備は、反董連合シナリオでは地理的な枠の都合もあり公孫瓚陣営にしています"/>
+            <TextBlock Text="またこれにより、関羽や張飛も公孫瓚陣営になり、しかし彼らの主は劉備であることを勘案した結果、"/>
+            <TextBlock Text="関羽や張飛は時間差で公孫瓚陣営陣営に加わるという処置に落ち着きました"/>
+            <TextBlock Text="漢陣営に申氏を含めていますが、これは史料になく、登場させた場所が漢領であることによるゲーム的な都合です"/>
+            <TextBlock Text="北匈奴陣営に白虎文と薬蘭泥を含めていますが、彼らは胡族と史料にあり、北匈奴とは異なると思われます"/>
+            <TextBlock Text="しかし胡族としての陣営を配置する場所が不明で枠がなく、北匈奴の人物も拡充したかったため、統合しました"/>
+            <TextBlock Text="南蛮は、正史で解釈すると反乱軍の陣容であり、南蛮陣営とするのは誤解を招きそうと認識していますが、"/>
+            <TextBlock Text="演義の登場人物も登場させており、それとの絡みも無視もできず他に妥当な勢力名もないため南蛮にしています"/>
+            <StackPanel Height="10"/>
+            <TextBlock Text="・地理について"/>
+            <TextBlock Text="できる限り縮尺を寄せるよう努力しましたが、隣接する２地域の距離感が場所により大きく異なります"/>
+            <TextBlock Text="外縁部では、ゲーム的な都合でマップに収まらないはずの場所を押し込めているので、特に顕著です"/>
+            <StackPanel Height="10"/>
+            <TextBlock Text="・正史/演義の準拠の立ち位置について"/>
+            <TextBlock Text="正史を基本としています、しかし演義の登場人物も登場させていて、そのため南蛮陣営は演義寄りです"/>
+            <StackPanel Height="10"/>
+            <TextBlock Text="・全般"/>
+            <TextBlock Text="周辺民族の時代考証を進めていますが、不備もあると思います、引き続き精度を高めていきたいと思います"/>
+            <TextBlock Text="指摘も歓迎しています"/>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -1,0 +1,3 @@
+﻿[*.cs]
+# CS8524: switch 式では、名前なしの列挙値を含む入力の種類の一部の値が処理されない (すべてを網羅していない)。
+dotnet_diagnostic.CS8524.severity = none

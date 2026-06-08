@@ -1,0 +1,11 @@
+{
+  "background_color": "#ffffff",
+  "description": "HisouSangokushiZero2_1_Uno",
+  "display": "standalone",
+  "name": "HisouSangokushiZero2_1_Uno",
+  "short_name": "HisouSangokushiZero2_1_Uno",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/",
+  "icons": []
+}

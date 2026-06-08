@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Wasm Debug, .net10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5000",
+      "webRoot": "${workspaceFolder}/HisouSangokushiZero2_1_Uno",
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "timeout": 30000,
+      "preLaunchTask": "build-wasm(net10.0)",
+      "server": {
+        "runtimeExecutable": "dotnet",
+        "program": "run",
+        "args": ["--no-build","-f","net10.0-browserwasm","--launch-profile", "HisouSangokushiZero2_1_Uno (WebAssembly)"],
+        "outputCapture": "std",
+        "timeout": 30000,
+        "cwd": "${workspaceFolder}/HisouSangokushiZero2_1_Uno"
+      }
+    },
+    {
+      "name": "Wasm Debug, .net9",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5000",
+      "webRoot": "${workspaceFolder}/HisouSangokushiZero2_1_Uno",
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "timeout": 30000,
+      "preLaunchTask": "build-wasm(net9.0)",
+      "server": {
+        "runtimeExecutable": "dotnet",
+        "program": "run",
+        "args": ["--no-build","-f","net9.0-browserwasm","--launch-profile", "HisouSangokushiZero2_1_Uno (WebAssembly)"],
+        "outputCapture": "std",
+        "timeout": 30000,
+        "cwd": "${workspaceFolder}/HisouSangokushiZero2_1_Uno"
+      }
+    },
+    {
+      "name": "Desktop Debug, .net10",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-desktop(net10.0)",
+      "program": "${workspaceFolder}/HisouSangokushiZero2_1_Uno/bin/Debug/net10.0-desktop/HisouSangokushiZero2_1_Uno.dll",
+      "args": [],
+      "launchSettingsProfile": "HisouSangokushiZero2_1_Uno (Desktop)",
+      "env": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "cwd": "${workspaceFolder}/HisouSangokushiZero2_1_Uno",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Desktop Debug, .net9",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-desktop(net9.0)",
+      "program": "${workspaceFolder}/HisouSangokushiZero2_1_Uno/bin/Debug/net9.0-desktop/HisouSangokushiZero2_1_Uno.dll",
+      "args": [],
+      "launchSettingsProfile": "HisouSangokushiZero2_1_Uno (Desktop)",
+      "env": {
+        "DOTNET_MODIFIABLE_ASSEMBLIES": "debug"
+      },
+      "cwd": "${workspaceFolder}/HisouSangokushiZero2_1_Uno",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+  ]
+}

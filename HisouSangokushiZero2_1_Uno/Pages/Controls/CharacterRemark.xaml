@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" ?>
+<UserControl 
+  x:Class="HisouSangokushiZero2_1_Uno.Pages.CharacterRemark"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:HisouSangokushiZero2_1_Uno.Pages">
+  <Grid x:Name="Content" Background="#FDDD" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="5">
+    <StackPanel x:Name="RemarkContent" Padding="5,0,5,5">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Grid VerticalAlignment="Center">
+          <Path x:Name="RemarkFrame" StrokeThickness="0.8" Stroke="Black" Fill="White" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+          <TextBlock x:Name="RemarkText"/>
+        </Grid>
+        <StackPanel VerticalAlignment="Center">
+          <StackPanel Height="22"/>
+          <Image x:Name="PersonImage" Width="{x:Bind local:CharacterRemark.personImageSize}" Height="{x:Bind local:CharacterRemark.personImageSize}"/>
+          <TextBlock x:Name="PersonName" HorizontalAlignment="Center" Height="22"/>
+        </StackPanel>
+      </StackPanel>
+      <Grid x:Name="ButtonPanel" Width="100" Height="25" HorizontalAlignment="Center"/>
+    </StackPanel>
+    <Button x:Name="CloseButton" Width="25" Height="20" Background="#2F00" HorizontalAlignment="Right" VerticalAlignment="Top">
+      <TextBlock Text="×" FontWeight="Bold" FontSize="25" LineHeight="32" Margin="-1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Button>
+  </Grid>
+</UserControl>

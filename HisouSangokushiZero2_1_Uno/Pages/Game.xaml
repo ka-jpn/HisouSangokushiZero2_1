@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" ?>
+<Page
+  x:Class="HisouSangokushiZero2_1_Uno.Pages.Game"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:skia="using:SkiaSharp.Views.Windows"
+  xmlns:local="using:HisouSangokushiZero2_1_Uno.Pages"
+  xmlns:code="using:HisouSangokushiZero2_1_Uno.Code"
+	HorizontalAlignment="Stretch" VerticalAlignment="Stretch" UseLayoutRounding="False" Background="#EEFE">
+  <Grid	x:Name="ContentGrid" MaxWidth="{x:Bind local:Game.initContentGridMaxWidth}">
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <ScrollViewer x:Name="MapScroll" Grid.Row="0">
+      <Grid x:Name="MapPanel">
+        <Image x:Name="MapImage" Stretch="Fill"/>
+        <Canvas x:Name="MapElementsCanvas"/>
+        <Canvas x:Name="MapAnimationElementsCanvas"/>
+      </Grid>
+    </ScrollViewer>
+    <StackPanel x:Name="TurnLogPanel" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="270"/>
+    <StackPanel x:Name="TurnWinCondPanel" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+    <Canvas x:Name="CountryPostsPanel" Grid.Row="1" HorizontalAlignment="Stretch" Height="{x:Bind code:UIUtil.countryPersonPutPanelHeight}" Background="Transparent"/>
+    <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="2">
+      <local:Ask x:Name="AskPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+      <local:CharacterRemark x:Name="CharacterRemarkPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+      <Canvas x:Name="MovePersonCanvas"/>
+    </Grid>
+    <Grid x:Name="InfoFramePanel" Grid.Row="0">
+      <Grid x:Name="InfoLayoutPanel">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="TopSwitchViewModeButton" Width="{x:Bind code:UIUtil.infoFrameWidth}" Height="{x:Bind code:UIUtil.infoFrameWidth}" Background="#AFFF" Padding="0">
+          <TextBlock FontSize="18" LineHeight="18" x:Name="SwitchViewModeButtonText"/>
+        </Button>
+        <Button x:Name="OpenLogButton" Grid.Column="1" Height="{x:Bind code:UIUtil.infoFrameWidth}" HorizontalAlignment="Stretch" Background="#AEFE" Padding="0">
+          <TextBlock FontSize="18" LineHeight="18" Text="ログ"/>
+        </Button>
+        <Button x:Name="OpenInfoButton" Grid.Row="1" Width="{x:Bind code:UIUtil.infoFrameWidth}" VerticalAlignment="Stretch" Background="#AEEF" Padding="0">
+          <TextBlock FontSize="18" LineHeight="18" Text="情&#xa;報"/>
+        </Button>
+        <local:GameLog x:Name="GameLogPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+        <local:ExInfo x:Name="ExInfoPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+      </Grid>
+    </Grid>
+    <local:StateInfo x:Name="StateInfoPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    <local:SaveAndLoad x:Name="SaveDataPanel" Grid.Row="0" Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+    <Grid x:Name="LoadingImagePanel" Grid.Row="0" Grid.RowSpan="3" Background="#EEF">
+      <TextBlock x:Name="LoadingText" Text="UI構築中.." HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+    </Grid>
+  </Grid>
+</Page>
+  
