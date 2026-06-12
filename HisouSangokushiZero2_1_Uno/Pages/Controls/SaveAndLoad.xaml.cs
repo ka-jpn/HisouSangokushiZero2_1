@@ -97,8 +97,18 @@ public sealed partial class SaveAndLoad:UserControl {
       async Task ReadSlot(){
         if (hasSaveDataList.ElementAtOrDefault(slotData.SlotIndex)) {
           GameData.startingPlayTotalTime = saveSlots.ElementAtOrDefault(slotData.SlotIndex)?.MaybeMeta?.TotalPlayTime ?? TimeSpan.Zero;
-          pressSlotAfterProcess(await Storage.ReadStorageData(IndexToFileNo(slotData.SlotIndex)));
+          ReadGame read = await Storage.ReadStorageData(IndexToFileNo(slotData.SlotIndex));
+          ReadGame attached = read with { MaybeGame = read.MaybeGame?.MyPipe(game => ParseGameVersion(saveSlots.ElementAtOrDefault(slotData.SlotIndex)?.MaybeMeta?.GameVersion).MyPipe(version => {
+            if(version.main is null or <=1 && version.sub is null or <=17) { return game.MyPipe(FillRequireState).MyPipe(FillFixTypoState).MyPipe(AttachArmyTarget); }
+            if(version.main is null or <=1 && version.sub is null or <=20) { return game.MyPipe(FillFixTypoState).MyPipe(AttachArmyTarget); }
+            return game;
+          }))};
+          pressSlotAfterProcess(attached);
         }
+        static GameState FillRequireState(GameState game) => game with { LogMessage = game.LogMessage ?? [], StartPlanningCharacterRemark = game.StartPlanningCharacterRemark ?? [], StartExecutionCharacterRemark = game.StartExecutionCharacterRemark ?? [] }; //バージョン1.17以前にnullableだったのをnotnullに
+        static GameState FillFixTypoState(GameState game) => game with { TurnNewLog = game.TurnNewLog ?? [] }; //バージョン1.20以前のタイポを修正、変数名が変わった
+        static GameState AttachArmyTarget(GameState game) => game.PlayCountry is not null ? UpdateGame.CalcArmyTarget(game) : game;//バージョン1.20以前のNPCの行動がユーザー行動後だった、ユーザー行動前になったので整合
+        static (int? main,int? sub) ParseGameVersion(string? versionText) => versionText?.Split('.').MyPipe(v=>(v.ElementAtOrDefault(0)?.MyPipe(int.Parse),v.ElementAtOrDefault(1)?.MyPipe(int.Parse))) ?? (null,null);
       }
     }
   }
@@ -122,6 +132,6 @@ public sealed partial class SaveAndLoad:UserControl {
       ])
     ]);
     GrayoutPanel.Visibility = Visibility.Visible;
-    Button CreateButton() => new(){ Width = 100, Height = 40,Background = new Color(68,0,0,0).ToBrush() };
+    static Button CreateButton() => new(){ Width = 100, Height = 40,Background = new Color(68,0,0,0).ToBrush() };
   }
 }

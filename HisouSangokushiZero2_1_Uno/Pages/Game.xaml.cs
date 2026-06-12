@@ -158,6 +158,8 @@ public sealed partial class Game:Page {
     }
   }
   private async Task InitGame(GameState newGameState) {
+    await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => CleanUI(newGameState));
+    await Task.Yield();
     await SetInitUI(newGameState);
     await Task.Yield();
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => UpdateAreaPanels(newGameState));
@@ -166,16 +168,13 @@ public sealed partial class Game:Page {
     await Task.Yield();
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => UpdateCountryInfoPanel(newGameState));
     await Task.Yield();
-    await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => CleanUI(newGameState));
-    await Task.Yield();
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => GameLog.UpdateLogMessageUI(newGameState));
     await Task.Yield();
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => ShowCharacterRemark(newGameState));
     GameData.game = newGameState;
     GameData.startGameDateTime = DateTime.Now;
     void CleanUI(GameState game) {
-      UIUtil.SetVisibility(AskPanel,false);
-      UIUtil.SetVisibility(CharacterRemarkPanel,false);
+      new List<UIElement>([AskPanel,CharacterRemarkPanel]).ForEach(v => UIUtil.SetVisibility(v,false));
       MovePersonCanvas.MySetChildren([]);
       MapAnimationElementsCanvas.MySetChildren([]);
     }
@@ -376,23 +375,11 @@ public sealed partial class Game:Page {
     }
     GameState EndPlanningPhase(GameState game) {
       ResetTurnUI();
-      return game.MyPipe(game => UpdateGame.AutoPutPostCPU(game,[ECountry.漢])).MyPipe(CalcArmyTarget).MyPipe(game => game with { Phase = Phase.Execution })
-        .MyApply(UpdateAreaPanels).MyApply(ExecutionMoveFlag).MyPipe(ArmyAttack).MyApply(GameLog.UpdateLogMessageUI).MyApply(ShowCharacterRemark).MyPipe(ResetPlanningParam);
+      return game.MyPipe(game => UpdateGame.AutoPutPostCPU(game,[ECountry.漢])).MyPipe(game => game with { Phase = Phase.Execution }).MyApply(UpdateAreaPanels).MyApply(ExecutionMoveFlag).MyPipe(ArmyAttack).MyApply(GameLog.UpdateLogMessageUI).MyApply(ShowCharacterRemark).MyPipe(ResetPlanningParam);
       void ResetTurnUI() => new List<UIElement>([CharacterRemarkPanel,CountryPostsPanel]).ForEach(v => UIUtil.SetVisibility(v,false));
       static GameState ResetPlanningParam(GameState game) => game with { StartPlanningCharacterRemark = [] };
-      static GameState CalcArmyTarget(GameState game) {
-        Dictionary<ECountry,EArea?> playerArmyTargetMap = game.PlayCountry.MyMaybeToList().Where(country => !Country.IsSleep(game,country)).ToDictionary(v => v,v => game.ArmyTargetMap.GetValueOrDefault(v));
-        Dictionary<ECountry,EArea?> NPCArmyTargetMap = game.CountryMap.Keys.Except(game.PlayCountry.MyMaybeToList()).Where(country => !Country.IsSleep(game,country)).ToDictionary(country => country,country => country == ECountry.漢 ? null : RandomSelectNPCAttackTarget(game,country));
-        return game with { ArmyTargetMap = new([.. NPCArmyTargetMap,.. playerArmyTargetMap]) };
-        static EArea? RandomSelectNPCAttackTarget(GameState game,ECountry country) {
-          List<EArea> targetAreas = Area.GetCellEachAdjacentAnotherCountryAreas(game,country);
-          Dictionary<EArea,int> targetAreaCountMap = targetAreas.CountBy(v => v).ToDictionary();
-          List<EArea?> selectWeightTargetAreas = [.. targetAreaCountMap.SelectMany(v => Enumerable.Repeat(v.Key,v.Value * v.Value)).MyNullable().Append(null)];
-          return selectWeightTargetAreas.MyPickAny().MyPipe(area => area?.MyPipe(game.AreaMap.GetValueOrDefault)?.Country == null && MyRandom.RandomJudge(0.9) ? null : area);
-        }
-      }
       void ExecutionMoveFlag(GameState game) {
-        game.ArmyTargetMap.Where(v => v.Value != null && Country.SuccessAttack(game,v.Key)).ToDictionary(attackInfo => GetFlag(game,attackInfo.Key),attackInfo => CalcFlagMovePos(game,attackInfo)).MyApply(flagMap => MapAnimationElementsCanvas.MySetChildren([.. flagMap.Keys])).MyApply(flagMap => MoveFlags(flagMap));
+        game.ArmyTargetMap.Where(v => v.Value != null && Country.IsSuccessAttack(game,v.Key)).ToDictionary(attackInfo => GetFlag(game,attackInfo.Key),attackInfo => CalcFlagMovePos(game,attackInfo)).MyApply(flagMap => MapAnimationElementsCanvas.MySetChildren([.. flagMap.Keys])).MyApply(flagMap => MoveFlags(flagMap));
         static Grid GetFlag(GameState game,ECountry attackCountry) {
           return CreateFlag(game,attackCountry).MyPipe(v => AttachFlag(game,v,attackCountry));
           static Grid CreateFlag(GameState game,ECountry attackCountry) {
@@ -458,14 +445,14 @@ public sealed partial class Game:Page {
       }
       static GameState ArmyAttack(GameState game) {
         return game.CountryMap.Keys.OrderBy(country => Country.GetTotalAffair(game,country)).Aggregate(game,(game,country) => {
-          return game.ArmyTargetMap.GetValueOrDefault(country) is EArea target ? TryAttack(game,country,target) : game.ArmyTargetMap.ContainsKey(country) ? ExeDefense(game,country) : ExeRest(game,country);
+          return game.ArmyTargetMap.GetValueOrDefault(country) is EArea target ? TryAttack(game,country,target) : !Country.IsSleep(game,country) ? ExeDefense(game,country) : ExeSleep(game,country);
           static GameState TryAttack(GameState game,ECountry country,EArea targetArea) {
-            return Country.SuccessAttack(game,country) ? ExeAttack(game,country,targetArea) : FailAttack(game,country,targetArea);
+            return Country.IsSuccessAttack(game,country) ? ExeAttack(game,country,targetArea) : FailAttack(game,country,targetArea);
             static GameState ExeAttack(GameState game,ECountry country,EArea targetArea) => targetArea.MyPipe(game.AreaMap.GetValueOrDefault)?.Country.MyPipe(defeseSide => UpdateGame.Attack(game,country,targetArea,defeseSide,Country.IsFocusDefense(game,defeseSide))) ?? game;
             static GameState FailAttack(GameState game,ECountry country,EArea targetArea) => game.MyPipe(game => UpdateGame.Defense(game,country,true)).MyPipe(game => country == game.PlayCountry ? UpdateGame.AppendStartExecutionRemark(game,[Text.StartExecutionFailAttackCharacterRemarkText(targetArea)]) : game);
           }
           static GameState ExeDefense(GameState game,ECountry country) => game.MyPipe(game => UpdateGame.Defense(game,country,false));
-          static GameState ExeRest(GameState game,ECountry country) => game.MyPipe(game => UpdateGame.Rest(game,country));
+          static GameState ExeSleep(GameState game,ECountry country) => game.MyPipe(game => UpdateGame.Sleep(game,country));
         });
       }
     }
@@ -475,8 +462,7 @@ public sealed partial class Game:Page {
       UIUtil.SetVisibility(CountryPostsPanel,true);
       return game.MyPipe(UpdateGame.GameEndJudge).MyPipe(game => game.Phase is Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd ? game : game.MyPipe(NextTurn));
       GameState NextTurn(GameState game) {
-        return game.MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)]))
-          .MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnWinCondUI).MyApply(GameLog.UpdateLogMessageUI).MyPipe(UpdateGame.GameEndJudge).MyApply(ShowCharacterRemark).MyPipe(ResetExecutionParam);
+        return game.MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(UpdateGame.Rest).MyApply(UpdateAreaPanels).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnWinCondUI).MyApply(GameLog.UpdateLogMessageUI).MyPipe(UpdateGame.GameEndJudge).MyApply(ShowCharacterRemark).MyPipe(ResetExecutionParam).MyPipe(UpdateGame.CalcArmyTarget);
       }
       static GameState ResetExecutionParam(GameState game) => game with { ArmyTargetMap = [],StartExecutionCharacterRemark = [] };
     }
@@ -560,7 +546,7 @@ public sealed partial class Game:Page {
         Button autoPutPersonButton = new Button { Width = UIUtil.personPutSize.Width * 3,VerticalAlignment = VerticalAlignment.Stretch,Background = Windows.UI.Color.FromArgb(100,100,100,100) }.MyApply(v => v.Content = new TextBlock { Text = Text.AutoPutPersonButtonText() });
         autoPutPersonButton.Click += (_,_) => GameData.game = AutoPutPersonButtonClick(GameData.game);
         return autoPutPersonButton;
-        GameState AutoPutPersonButtonClick(GameState game) => game.PlayCountry?.MyPipe(country => Code.Post.GetAutoPutPost(game,country,role)).MyPipe(postMap => UpdateGame.SetPersonPost(game,postMap)).MyApply(v => UpdateAreaPanels(v)).MyApply(game => UpdateCountryPosts(game)) ?? game;
+        GameState AutoPutPersonButtonClick(GameState game) => game.PlayCountry?.MyPipe(country => Code.Post.GetAutoPutPost(game,country,role)).MyPipe(postMap => UpdateGame.SetPersonPost(game,postMap)).MyApply(UpdateAreaPanels).MyApply(UpdateCountryPosts) ?? game;
       }
       StackPanel CreatePersonHeadPostPanel(GameState game,ERole role) {
         return new StackPanel { Orientation = Orientation.Horizontal,BorderBrush = GetPostFrameColor(game,null).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth) }.MySetChildren([
@@ -701,7 +687,7 @@ public sealed partial class Game:Page {
     internal static void Exit() => pushArea = null;
     internal static GameState Release(Game page,GameState game,EArea area) {
       ECountry? areaCountry = game.AreaMap.GetValueOrDefault(area)?.Country;
-      return pushArea != area ? game : game.Phase == Phase.Starting ? ShowSelectPlayCountryPanel(game,areaCountry) : Area.IsPlayerSelectable(game,area) ? SelectTarget(game,areaCountry != game.PlayCountry ? area : null) : game;
+      return pushArea != area ? game : game.Phase == Phase.Starting ? ShowSelectPlayCountryPanel(game,areaCountry) : Area.IsPlayerSelectable(game,area) ? SelectTarget(game,areaCountry != game.PlayCountry && !Country.IsSleep(game,game.PlayCountry) ? area : null) : game;
       GameState ShowSelectPlayCountryPanel(GameState game,ECountry? pushCountry) {
         string title = Text.CountryParamCaptionText(pushCountry);
         List<TextBlock> contents = [
@@ -726,19 +712,15 @@ public sealed partial class Game:Page {
         return game;
         static TextBlock Make(string text) => new() { Text = text,HorizontalAlignment = HorizontalAlignment.Center };
         GameState ClickOkButtonAction(GameState game,ECountry playCountry) {
-          GameState newGameState = SelectPlayCountry(game,playCountry).MyPipe(StartGame).MyPipe(game => UpdateGame.AppendLogMessage(game,[Text.TurnHeadLogText(game)])).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)]));
-          newGameState.MyApply(page.UpdateCountryInfoPanel).MyApply(page.ShowCharacterRemark);
-          return newGameState;
+          return SelectPlayCountry(game,playCountry).MyPipe(StartGame).MyPipe(game => UpdateGame.AppendLogMessage(game,[Text.TurnHeadLogText(game)])).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyApply(page.UpdateCountryInfoPanel).MyApply(page.ShowCharacterRemark);
         }
         GameState SelectPlayCountry(GameState game,ECountry playCountry) => UpdateGame.AttachGameStartData(game,playCountry).MyApply( page.UpdateCountryPosts);
         GameState StartGame(GameState game) {
-          GameState newGameState = (game with { Phase = Phase.Planning }).MyPipe(UpdateGame.AppendGameStartLog);
-          newGameState.MyApply(page.UpdateAreaPanels).MyApply(GameLog.UpdateLogMessageUI).MyApply(page.UpdateTurnLogUI).MyApply(page.UpdateTurnWinCondUI);
-          page.MyApply(page => UIUtil.SetVisibility(page.CountryPostsPanel,true));
-          return newGameState;
+          UIUtil.SetVisibility(page.CountryPostsPanel,true);
+          return (game with { Phase = Phase.Planning }).MyPipe(UpdateGame.AppendGameStartLog).MyApply(page.UpdateAreaPanels).MyApply(GameLog.UpdateLogMessageUI).MyApply(page.UpdateTurnLogUI).MyApply(page.UpdateTurnWinCondUI).MyPipe(UpdateGame.CalcArmyTarget);
         }
       }
-      GameState SelectTarget(GameState game,EArea? area) => game.PlayCountry?.MyPipe(playCountry => game.Phase == Phase.Planning && !Country.IsSleep(game,playCountry) ? (game with { ArmyTargetMap = game.ArmyTargetMap.MyAdd(playCountry,null).MyUpdate(playCountry,(_,_) => area) ?? game.ArmyTargetMap }).MyApply(page.UpdateCountryInfoPanel) : null) ?? game;
+      GameState SelectTarget(GameState game,EArea? area) => game.PlayCountry?.MyPipe(playCountry => game.Phase == Phase.Planning && !Country.IsSleep(game,playCountry) ? (game with { ArmyTargetMap = game.ArmyTargetMap.MyUpdate(playCountry,(_,_) => area) }).MyApply(page.UpdateCountryInfoPanel) : null) ?? game;
     }
   }
 }

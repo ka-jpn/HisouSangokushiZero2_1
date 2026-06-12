@@ -1,4 +1,3 @@
-using HisouSangokushiZero2_1_Uno.Data.Language;
 using HisouSangokushiZero2_1_Uno.MyUtil;
 using System;
 using System.Collections.Generic;

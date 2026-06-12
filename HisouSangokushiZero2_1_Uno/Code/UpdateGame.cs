@@ -1,11 +1,9 @@
-using HisouSangokushiZero2_1_Uno.Data.Language;
 using HisouSangokushiZero2_1_Uno.Data.Scenario;
 using HisouSangokushiZero2_1_Uno.MyUtil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
-using static HisouSangokushiZero2_1_Uno.Code.UIUtil;
 using PostType = HisouSangokushiZero2_1_Uno.Code.DefType.Post;
 using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Code;
@@ -153,15 +151,23 @@ internal static class UpdateGame {
     Army attackArmy = Commander.GetAttackCommander(game,attackCountry).MyPipe(commander => new Army(attackCountry,commander,Commander.CommanderRank(game,commander,ERole.Attack)));
     AttackResult? countryBattle = Battle.Country.Attack(game,defenseCountry,targetArea,attackArmy,defenseSideFocusDefense);
     AttackResult areaBattle = Battle.Area.Attack(game,defenseCountry,targetArea,attackArmy,defenseSideFocusDefense);
-    return game.MyPipe(game => PayAttackFunds(game,attackCountry)).MyPipe(game => AttackSideDamage(game,attackCountry))
-  .MyPipe(game => BattleDefenseSideCentralDefense(game,countryBattle,attackCountry,targetArea,attackArmy))
-      .MyPipe(game => countryBattle?.Judge is AttackJudge.Lose or AttackJudge.Rout ? game : BattleDefenseSideAreaDefense(game,areaBattle,attackCountry,targetArea,attackArmy));
+    return game.MyPipe(game => PayAttackFunds(game,attackCountry)).MyPipe(game => AttackSideDamage(game,attackCountry)).MyPipe(game => BattleDefenseSideCentralDefense(game,countryBattle,attackCountry,targetArea,attackArmy)).MyPipe(game => countryBattle?.Judge is AttackJudge.Lose or AttackJudge.Rout ? game : BattleDefenseSideAreaDefense(game,areaBattle,attackCountry,targetArea,attackArmy));
     static GameState AttackSideDamage(GameState game,ECountry attackCountry) => game with { AreaMap = game.AreaMap.ToDictionary(v => v.Key,v => v.Value.Country == attackCountry ? v.Value with { AffairParam = v.Value.AffairParam with { AffairNow = Math.Round(v.Value.AffairParam.AffairNow * 0.99m,4) } } : v.Value) };
     static GameState BattleDefenseSideCentralDefense(GameState game,AttackResult? countryBattle,ECountry attackCountry,EArea targetArea,Army attackArmy) => countryBattle?.Judge.MyPipe(judge => AppendLogMessage(game,[countryBattle.InvadeText]).MyPipe(game => CountryAttack(game,attackCountry,targetArea,attackArmy,countryBattle.Defense,judge))) ?? game;
     static GameState BattleDefenseSideAreaDefense(GameState game,AttackResult areaBattle,ECountry attackCountry,EArea targetArea,Army attackArmy) => AppendLogMessage(game,[areaBattle.InvadeText]).MyPipe(game => areaBattle.Judge.MyPipe(judge => AreaAttack(game,attackCountry,targetArea,attackArmy,areaBattle.Defense,judge)));
   }
   internal static GameState Defense(GameState game,ECountry country,bool isTryAttack) => game.MyPipe(game => isTryAttack ? game with { ArmyTargetMap = game.ArmyTargetMap.MyRemove(country) } : game).MyPipe(game => AppendLogMessage(game,[Text.DefenseText(country,isTryAttack)]));
-  internal static GameState Rest(GameState game,ECountry country) {
-    return AppendLogMessage(game,[Text.RestText(country,Country.GetSleepTurn(game,country))]) with { CountryMap = game.CountryMap.MyUpdate(country,(_,info) => info with { SleepTurnNum = info.SleepTurnNum - 1 }) };
+  internal static GameState Sleep(GameState game, ECountry country) => AppendLogMessage(game, [Text.SleepText(country, Country.GetSleepTurn(game, country))]);
+  internal static GameState Rest(GameState game) => game with { CountryMap = game.CountryMap.ToDictionary(v => v.Key,v => Country.IsSleep(game,v.Key) && game.ArmyTargetMap.GetValueOrDefault(v.Key) is null ? v.Value with { SleepTurnNum = v.Value.SleepTurnNum - 1 } : v.Value)};
+  internal static GameState CalcArmyTarget(GameState game) {
+    Dictionary<ECountry,EArea?> playerArmyTargetMap = new(game.PlayCountry is ECountry player ? [new(player,null)]:[]);
+    Dictionary<ECountry,EArea?> NPCArmyTargetMap = game.CountryMap.Keys.Except(game.PlayCountry.MyMaybeToList()).Where(country => !Country.IsSleep(game,country)).ToDictionary(country => country,country => country == ECountry.漢 ? null : RandomSelectNPCAttackTarget(game,country));
+    return game with { ArmyTargetMap = new([.. NPCArmyTargetMap,.. playerArmyTargetMap]) };
+    static EArea? RandomSelectNPCAttackTarget(GameState game,ECountry country) {
+      List<EArea> targetAreas = Area.GetCellEachAdjacentAnotherCountryAreas(game,country);
+      Dictionary<EArea,int> targetAreaCountMap = targetAreas.CountBy(v => v).ToDictionary();
+      List<EArea?> selectWeightTargetAreas = [.. targetAreaCountMap.SelectMany(v => Enumerable.Repeat(v.Key,v.Value * v.Value)).MyNullable().Append(null)];
+      return selectWeightTargetAreas.MyPickAny().MyPipe(area => area?.MyPipe(game.AreaMap.GetValueOrDefault)?.Country == null && MyRandom.RandomJudge(0.9) ? null : area);
+    }
   }
 }

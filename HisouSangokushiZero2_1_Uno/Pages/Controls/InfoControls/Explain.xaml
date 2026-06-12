@@ -16,18 +16,24 @@
       <TextBlock Text="ただし攻撃先地域が競合した場合は総内政値が小さい陣営から戦闘権を得ます" HorizontalAlignment="Center"/>
       <TextBlock Text="NPC勢力は他の勢力のフェイズを参照せずにフェイズ内容を決定し、プレイヤーを特別視しません" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
-      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="プレイヤーの軍議フェイズについて" HorizontalAlignment="Center"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="軍議フェイズについて" HorizontalAlignment="Center"/>
       <TextBlock Text="人物の配置移動と侵攻の指令ができます、フェイズ内であれば指令しなおせます" HorizontalAlignment="Center"/>
       <TextBlock Text="人物の配置は首都に接続している自領土内で移動できます、距離の制限はありません" HorizontalAlignment="Center"/>
       <TextBlock Text="侵攻の指令ができるのは首都に接続している自領土に隣接している他国の地域および自治領です" HorizontalAlignment="Center"/>
       <TextBlock Text="「軍議終了」ボタンをクリックで戦略フェイズを確定して進行します" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="行動フェイズについて" HorizontalAlignment="Center"/>
+      <TextBlock Text="軍議フェイズの侵攻指令が実際に行われます" HorizontalAlignment="Center"/>
+      <TextBlock Text="それぞれの陣営の侵攻状態がマップにアニメーションされます" HorizontalAlignment="Center"/>
+      <TextBlock Text="「確認」ボタンをクリックで行動フェイズの表示を終えます" HorizontalAlignment="Center"/>
+      <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="侵攻の指令について" HorizontalAlignment="Center"/>
       <TextBlock Text="[国力回復時]" HorizontalAlignment="Center"/>
-      <TextBlock Text="指令ができず防衛専念状態にもなりません(人物の配置換えとターン終了のみ実行可能)" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻指令ができません、防衛専念状態にもなりません" HorizontalAlignment="Center"/>
       <TextBlock Text="[行動可能時]" HorizontalAlignment="Center"/>
       <TextBlock Text="隣接他国領土をクリック：「資金が足りればその地域に侵攻、足りなければ防衛専念」を指令にします" HorizontalAlignment="Center"/>
-      <TextBlock Text="自国領土をクリック：「防衛専念(防御ランク補正+1)」を指令にします" HorizontalAlignment="Center"/>
+      <TextBlock Text="自国領土をクリック：「防衛専念」を指令にします" HorizontalAlignment="Center"/>
+      <TextBlock Text="※防衛専念：防御ランクに+1の補正が付きます" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="人物の配置について" HorizontalAlignment="Center"/>
       <StackPanel HorizontalAlignment="Center">
@@ -40,12 +46,14 @@
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都について" HorizontalAlignment="Center"/>
       <TextBlock Text="首都は領土内で内政値が一番高い土地に自動で設定されます" HorizontalAlignment="Center"/>
-      <TextBlock Text="首都の内政値は1.5倍の値として総内政値(収入計算に寄与)に計算されます" HorizontalAlignment="Center"/>
-      <TextBlock Text="首都を攻められたときは中央の防衛官が迎撃、敗れれば首都エリアの防衛官が防衛の戦闘になります" HorizontalAlignment="Center"/>
-      <TextBlock Text="首都陥落時には中央所属(それぞれの地域にいる防衛官・内政官以外)の将がそれぞれ50%の確率で戦死します" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都の内政値は1.5倍の値として総内政値に寄与されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都を攻められると首都エリアの地域防衛担当がまず防衛の戦闘、敗れれば首都の防衛ポストの人物が迎撃します" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都陥落時には中央所属(それぞれの地域にいる防衛担当・内政担当以外)の人物がそれぞれ50%の確率で戦死します" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="戦闘の判定について" HorizontalAlignment="Center"/>
-      <TextBlock Text="侵攻と首都防衛は(筆頭ランク+次席ランク/2) が合計のランクになります" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土の防衛は領土エリア毎の防衛担当が行います" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻は首都の侵攻ポストの筆頭と次席、首都防衛は首都の防衛ポストの筆頭と次席が行います" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土の防衛担当はランクそのまま、首都のポストは(筆頭ランク+次席ランク/2)が合計のランクになります" HorizontalAlignment="Center"/>
       <TextBlock Text="戦闘時のランクおよび乱数(0以上~100未満)と結果" HorizontalAlignment="Center"/>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2.5,0,5">
         <StackPanel>
@@ -112,44 +120,70 @@
       <TextBlock Text="人物に設定された死去年+10年 ・・・ 1 (必ず死去)" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都中枢担当人物による登用について" HorizontalAlignment="Center"/>
-      <TextBlock Text="データがある人物の登用、いなければ無名人物の登用が行われます" HorizontalAlignment="Center"/>
-      <TextBlock Text="データがある人物は秋ターンに担当人物の能力に関係なく確実に登用され、陣営に追加されます" HorizontalAlignment="Center"/>
-      <TextBlock Text="無名人物は (筆頭ランク+次席ランク/2+1)/30 の確率で毎ターンの始めに成功判定され、陣営に追加されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="陣営毎に登場が設定された人物がいればその人物の登用、いなければ無名人物の登用が行われます" HorizontalAlignment="Center"/>
+      <TextBlock Text="登場が設定された人物は秋ターンに担当人物の能力に関係なく確実に登用され、陣営に追加されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="無名人物は筆頭と次席のランクにより確率で毎ターンの始めに成功判定され、陣営に追加されます" HorizontalAlignment="Center"/>
       <TextBlock Text="基本的に無名人物はランク1ですが、まれにランク2が出現することがあります" HorizontalAlignment="Center"/>
       <TextBlock Text="登用された人物が配置できるポストがない場合、配置できるようになるまで人物駒の出現は延期されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="※無名人物の登用確率：季節毎に、(筆頭ランク+次席ランク/2+1)/30" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都内政担当人物による内政について" HorizontalAlignment="Center"/>
-      <TextBlock Text="(筆頭ランク+次席ランク/2)/5+1 が陣営の内政力となり、総内政値による税収と内政上昇値に乗算されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="筆頭と次席のランクにより陣営の内政力が上乗せされます" HorizontalAlignment="Center"/>
+      <TextBlock Text="陣営の内政力は総内政値による軍資金税収と地域毎の内政上昇値に影響します" HorizontalAlignment="Center"/>
+      <TextBlock Text="※陣営の内政力：(筆頭ランク+次席ランク/2)/5+1" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="地域担当人物による内政について" HorizontalAlignment="Center"/>
-      <TextBlock Text="対象地域内政担当の人物ランク×陣営の内政力/内政難度 がその地域のターン更新時の内政上昇値となります" HorizontalAlignment="Center"/>
+      <TextBlock Text="地域毎に内政担当の人物ランクによって地域の内政値が上昇します" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政値は地域毎の内政上限値に近づくごとに伸びが悪くなります" HorizontalAlignment="Center"/>
+      <TextBlock Text="地域毎の内政上限値は季節毎に少しずつ伸びていきます" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政上昇値は中央ポストの内政担当の筆頭と次席の人物ランクも影響します" HorizontalAlignment="Center"/>
+      <TextBlock Text="※内政上昇値：季節毎に、対象地域の内政担当の人物ランク×陣営の内政力×(1-内政値/内政上限値)/内政難度" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="内政難度について" HorizontalAlignment="Center"/>
-      <TextBlock Text="領土数の0.5乗が内政難度となります、領土が広がるとデバフとなることを表現しています" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土の広さに伴って内政難度が増えます" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政難度が上がると、収入効率が減少します" HorizontalAlignment="Center"/>
+      <TextBlock Text="ただし、収入効率は陣営の内政力も影響します" HorizontalAlignment="Center"/>
+      <TextBlock Text="※内政難度：領土エリア数^0.5" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="収支計算について" HorizontalAlignment="Center"/>
-      <TextBlock Text="軍資金税収+資本注入 が収入、民政費+内政費+俸禄費 が支出となります" HorizontalAlignment="Center"/>
-      <TextBlock Text="軍資金税収は総内政値×内政力/内政難度、資本注入は10/領土数、" HorizontalAlignment="Center"/>
-      <TextBlock Text="民政費は(1-0.9^内政難度)×総内政値/内政難度、内政費は地域内政担当の人物ランク合計×2、" HorizontalAlignment="Center"/>
-      <TextBlock Text="俸禄費は陣営所属の人物ランク合計×0.1に加えて筆頭が1、次席が0.5、地域内政担当と地域防衛担当が0.5です" HorizontalAlignment="Center"/>
-      <TextBlock Text="ターン更新時に 収入-支出 が資金に合計されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="ターン毎に、収入-支出が資金に合計されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="収支や資金がマイナスになってもペナルティはありません" HorizontalAlignment="Center"/>
+      <TextBlock Text="収入には軍資金税収と資本注入、支出には民政費と内政費と俸禄費があります" HorizontalAlignment="Center"/>
+      <TextBlock Text="軍資金税収は領土からの収入です、内政値に応じて収入がありますが内政難度によるデバフがあります" HorizontalAlignment="Center"/>
+      <TextBlock Text="資本注入は陣営トップが陣営に入れる資金で、領土数が少ない時は頑張り、多くなると怠けます" HorizontalAlignment="Center"/>
+      <TextBlock Text="民政費は民衆還元分とその政治コストです、内政難度や総内政値が増えると増え、陣営の内政力が増えると減ります" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政費は地域内政担当の人物が内政をする際のコストです、人物ランクが高いと内政上昇値も増えますがこれも増えます" HorizontalAlignment="Center"/>
+      <TextBlock Text="俸禄費は陣営所属の人物に支払われる俸禄で、人物ランク毎に所属人物に俸禄があります、担当ポストによって増えます" HorizontalAlignment="Center"/>
+      <TextBlock Text="※軍資金税収：季節毎に、総内政値×内政力/内政難度" HorizontalAlignment="Center"/>
+      <TextBlock Text="※資本注入：季節毎に、10/領土数" HorizontalAlignment="Center"/>
+      <TextBlock Text="※民政費：季節毎に、(1-0.9^内政難度)×総内政値/内政力" HorizontalAlignment="Center"/>
+      <TextBlock Text="※内政費：季節毎に、地域内政担当の人物ランク合計×2" HorizontalAlignment="Center"/>
+      <TextBlock Text="※俸禄費：季節毎に、陣営所属の人物ランク合計×0.1+(筆頭が1、次席が0.5、地域内政担当と地域防衛担当が0.5)" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="侵攻出撃費用について" HorizontalAlignment="Center"/>
-      <TextBlock Text="(筆頭ランク+次席ランク/2+1)×50が出撃費用となり、資金が足りている時のみ侵攻できます" HorizontalAlignment="Center"/>
-      <TextBlock Text="資金が足りていない場合は実行されず、防衛専念と同じ扱いになります(ペナルティなし)" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都の攻撃ポストの筆頭と次席のランクにより出撃費用が算定され、資金が足りている時のみ侵攻できます" HorizontalAlignment="Center"/>
+      <TextBlock Text="資金が足りていない場合は実行されませんがペナルティはなく、防衛専念と同じ扱いになります" HorizontalAlignment="Center"/>
+      <TextBlock Text="※出撃費用：(筆頭ランク+次席ランク/2+1)×50" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="内政値・内政上限値について" HorizontalAlignment="Center"/>
-      <TextBlock Text="領土に「(現内政値)/(内政上限値)」表記があり、表記は小数点以下切捨てですが小数点以下4桁まで計算されます" HorizontalAlignment="Center"/>
-      <TextBlock Text="内政上限値は毎ターン少量増加し(×100.1%+0.01)現内政値が上回ることはできません" HorizontalAlignment="Center"/>
-      <TextBlock Text="他のエリアに侵攻する際に自領土の各エリアの内政値が1%低下します" HorizontalAlignment="Center"/>
-      <TextBlock Text="侵攻され領有が変わると現内政値が90%、内政上限値が95%になります" HorizontalAlignment="Center"/>
-      <TextBlock Text="防衛成功した場合は現内政値が95%(内政上限値は変更なし)になります" HorizontalAlignment="Center"/>
+      <TextBlock Text="領土に「(内政値)/(内政上限値)」表記があり、小数点以下切捨てで表記されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="内政上限値は毎ターン少量増加し、内政値が上回ることはできません" HorizontalAlignment="Center"/>
+      <TextBlock Text="他のエリアに侵攻する際に徴兵弊害として自領土の各エリアの内政値が少し低下します" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻され領有が変わると荒廃して、内政値がかなり減ります、内政上限値も減ります" HorizontalAlignment="Center"/>
+      <TextBlock Text="防衛成功した場合は、領有が変わるよりは少ないですが、損害として内政値がいくらか減ります" HorizontalAlignment="Center"/>
+      <TextBlock Text="※内政値＆内政上限値精度：表記は小数点以下切捨て、内部では小数点以下4桁まで計算" HorizontalAlignment="Center"/>
+      <TextBlock Text="※内政上限値：季節毎に、+0.1%+0.01" HorizontalAlignment="Center"/>
+      <TextBlock Text="※徴兵弊害：自領土の各エリアの内政値が1%低下" HorizontalAlignment="Center"/>
+      <TextBlock Text="※荒廃：内政値が90%に＆内政上限値が95%に" HorizontalAlignment="Center"/>
+      <TextBlock Text="※損害：内政値が95%に(内政上限値は変更なし)" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="中華領域について" HorizontalAlignment="Center"/>
-      <TextBlock Text="人物配置枠が黄色っぽくなっているのが中華領域で、勝利条件に絡みます" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物配置枠が黄色っぽくなっているのが中華領域です" HorizontalAlignment="Center"/>
+      <TextBlock Text="陣営により勝利条件に含まれており、勝利条件に影響します" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="助力について" HorizontalAlignment="Center"/>
-      <TextBlock Text="人物を元々の役割でない役割に割り当てることができます、ただし発揮するランクが1つ下がります" HorizontalAlignment="Center"/>
+      <TextBlock Text="人物を元々の役割でない役割に割り当てることができます" HorizontalAlignment="Center"/>
+      <TextBlock Text="ただし、他の役割に助力する際は発揮するランクが1つ下がります" HorizontalAlignment="Center"/>
       <TextBlock Text="元々の役割に戻すと発揮するランクも戻ります" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="道の種類と太さについて" HorizontalAlignment="Center"/>

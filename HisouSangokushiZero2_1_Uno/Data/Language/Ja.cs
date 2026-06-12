@@ -37,7 +37,7 @@ internal class Ja:ILangText {
   string? ILangText.NaturalDeathPersonText(ECountry country, List<PersonId> deathPersons) => deathPersons.Count != 0 ? $"{country}の{string.Join("と", deathPersons.Select(v => v.Value))}が死去" : null;
   string? ILangText.WarDeathBureaucracyPersonText(EArea area, List<PersonId> deathPersons) => deathPersons.Count != 0 ? $"{area}にいた{string.Join("と", deathPersons.Select(v => v.Value))}が戦死" : null;
   string ILangText.DefenseText(ECountry country, bool isTryAttack) => $"{(isTryAttack ? "(資金不足で攻撃中止)" : null)}{country}は防衛に専念";
-  string ILangText.RestText(ECountry country, int remainRestTurn) => $"{country}は国力回復中(残り{remainRestTurn}ターン)";
+  string ILangText.SleepText(ECountry country, int remainSleepTurn) => $"{country}は国力回復中(残り{remainSleepTurn}ターン)";
   string ILangText.ChangeHasCountryText(ECountry attackSide, ECountry? defenseSide, EArea targetArea) => $"{CountryText(defenseSide)}領の{targetArea}が{CountryText(attackSide)}領に";
   string ILangText.FallCapitalText(ECountry? country) => $"{CountryText(country)}の首都が陥落";
   string ILangText.PerishCountryText(ECountry? country) => $"{CountryText(country)}が滅亡";

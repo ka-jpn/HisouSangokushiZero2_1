@@ -8,7 +8,5 @@ internal sealed partial class GameLog:UserControl {
   internal GameLog() {
     InitializeComponent();
   }
-  internal static void UpdateLogMessageUI(GameState game) {
-    logMessages.MyApply(v => v.Clear()).MyApply(v => game.LogMessage.ForEach(v.Add));
-  }
+    internal static void UpdateLogMessageUI(GameState game) => logMessages.MyApply(v => v.Clear()).MyApply(v => game.LogMessage.ForEach(v.Add));
 }

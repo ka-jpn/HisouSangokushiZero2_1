@@ -998,7 +998,7 @@ internal class Scenario1:ScenarioBase.IScenario {
     new(new("護留"),new(ERole.Defense,1,180,240,ECountry.烏丸)),
     new(new("蹋頓"),new(ERole.Attack,2,160,207,ECountry.烏丸)),
     new(new("高位宮"),new(ERole.Central,1,175,227, ECountry.高句麗)),
-    new(new("乙巴素"),new(ERole.Affair,1,160,203,ECountry.高句麗)),
+    new(new("乙巴素"),new(ERole.Affair,2,160,203,ECountry.高句麗)),
     new(new("高憂位居"),new(ERole.Defense,2,209,248,ECountry.高句麗)),
     new(new("高男武"),new(ERole.Attack,1,140,197,ECountry.高句麗)),
     new(new("夫租王"),new(ERole.Central,1,175,235, ECountry.沃沮)),

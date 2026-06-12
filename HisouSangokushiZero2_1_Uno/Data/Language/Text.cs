@@ -34,7 +34,7 @@ internal static class Text {
   internal static string? NaturalDeathPersonText(ECountry country, List<PersonId> deathPersons) => GameData.langText.NaturalDeathPersonText(country, deathPersons);
   internal static string? WarDeathBureaucracyPersonText(EArea area, List<PersonId> deathPersons) => GameData.langText.WarDeathBureaucracyPersonText(area, deathPersons);
   internal static string DefenseText(ECountry country, bool isTryAttack) => GameData.langText.DefenseText(country, isTryAttack);
-  internal static string RestText(ECountry country, int remainRestTurn) => GameData.langText.RestText(country, remainRestTurn);
+  internal static string SleepText(ECountry country, int remainSleepTurn) => GameData.langText.SleepText(country, remainSleepTurn);
   internal static string ChangeHasCountryText(ECountry attackSide, ECountry? defenseSide, EArea targetArea) => GameData.langText.ChangeHasCountryText(attackSide, defenseSide, targetArea);
   internal static string? FallCapitalText(ECountry? country) => GameData.langText.FallCapitalText(country);
   internal static string? PerishCountryText(ECountry? country) => GameData.langText.PerishCountryText(country);
@@ -112,7 +112,7 @@ internal static class Text {
     internal string? NaturalDeathPersonText(ECountry country, List<PersonId> deathPersons);
     internal string? WarDeathBureaucracyPersonText(EArea area, List<PersonId> deathPersons);
     internal string DefenseText(ECountry country, bool isTryAttack);
-    internal string RestText(ECountry country, int remainRestTurn);
+    internal string SleepText(ECountry country, int remainSleepTurn);
     internal string ChangeHasCountryText(ECountry attackSide, ECountry? defenseSide, EArea targetArea);
     internal string FallCapitalText(ECountry? country);
     internal string PerishCountryText(ECountry? country);

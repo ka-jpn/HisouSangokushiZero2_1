@@ -11,10 +11,10 @@ namespace HisouSangokushiZero2_1_Uno.Code;
 internal static class Storage {
   private static string CreateMetaFileName(int fileNo) => $"save{fileNo}.meta";
   private static string CreateSaveFileName(int fileNo) => $"save{fileNo}.dat";
-  private static void Write(string folderName, string fileName, byte[] writeData) => File.WriteAllBytes(Path.Combine(folderName, fileName), writeData);
   private static StorageFolder GetStorageFolder() => ApplicationData.Current.LocalFolder;
   private static async Task<List<StorageFile>> GetFilesAsync(StorageFolder folder) => [.. await folder.GetFilesAsync()];
   private static bool ExistsFile(string folderName, string fileName) => File.Exists(Path.Combine(folderName, fileName));
+  private static void Write(string folderName, string fileName, byte[] writeData) => File.WriteAllBytes(Path.Combine(folderName, fileName), writeData);
   private static byte[] Read(string folderName, string fileName) => File.ReadAllBytes(Path.Combine(folderName, fileName));
   internal static async Task WriteStorageData(GameState game,TimeSpan startingPlayTotalTime,int fileNo) {
     TimeSpan totalPlayTime = DateTime.Now - GameData.startGameDateTime + startingPlayTotalTime;
@@ -27,14 +27,9 @@ internal static class Storage {
   internal static async Task<ReadGame> ReadStorageData(int fileNo) {
     bool newSaveFileExists = GetStorageFolder().MyPipe(myFolder => ExistsFile(myFolder.Path,CreateSaveFileName(fileNo)));
     bool oldSaveFileExists = GetStorageFolder().MyPipe(myFolder => ExistsFile(Path.Combine(myFolder.Path, BaseData.name.Value), CreateSaveFileName(fileNo)));
-    return newSaveFileExists ? new(ReadState.Read, MessagePackSerializer.Deserialize<GameState?>(Read(GetStorageFolder().Path, CreateSaveFileName(fileNo)))?.MyPipe(FillState)) :
-      oldSaveFileExists ? new(ReadState.Read, MessagePackSerializer.Deserialize<GameState?>(Read(Path.Combine(GetStorageFolder().Path, BaseData.name.Value), CreateSaveFileName(fileNo)))?.MyPipe(FillState)) :
+    return newSaveFileExists ? new(ReadState.Read, MessagePackSerializer.Deserialize<GameState?>(Read(GetStorageFolder().Path, CreateSaveFileName(fileNo)))) :
+      oldSaveFileExists ? new(ReadState.Read, MessagePackSerializer.Deserialize<GameState?>(Read(Path.Combine(GetStorageFolder().Path, BaseData.name.Value), CreateSaveFileName(fileNo)))) :
       new(ReadState.NotFind, null);
-    static GameState FillState(GameState game) => game with {
-      LogMessage = game.LogMessage ?? [],
-      StartPlanningCharacterRemark = game.StartPlanningCharacterRemark ?? [],
-      StartExecutionCharacterRemark = game.StartExecutionCharacterRemark ?? []
-    };
   }
   internal static async Task DeleteStorageData(int fileNo) {
     Path.Combine(GetStorageFolder().Path, BaseData.name.Value, CreateSaveFileName(fileNo)).MyApply(filePath => (File.Exists(filePath) ? File.Delete : (Action<string>)(_ => { })).Invoke(filePath));
@@ -52,6 +47,6 @@ internal static class Storage {
     List<StorageFile> newSaveFiles = await GetStorageFolder().MyPipe(GetFilesAsync);
     List<StorageFile> oldSaveFiles = Directory.Exists(Path.Combine(GetStorageFolder().Path, BaseData.name.Value)) ? await (await GetStorageFolder().GetFolderAsync(BaseData.name.Value)).MyPipe(GetFilesAsync) : [];
     List<List<StorageFile>> saveFiles = [newSaveFiles, oldSaveFiles];
-    return [.. Enumerable.Range(1, 10).Select(fileNo => saveFiles.Any(v => v.FirstOrDefault(v => v.Name == CreateSaveFileName(fileNo)) is { }))];
+    return [.. Enumerable.Range(1, 10).Select(fileNo => saveFiles.Any(v => v.FirstOrDefault(v => v.Name == CreateSaveFileName(fileNo)) is not null))];
   }
 }
