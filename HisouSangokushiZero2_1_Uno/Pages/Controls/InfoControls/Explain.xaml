@@ -45,10 +45,15 @@
       <TextBlock Text="筆頭と次席以外の中央のポストはストック扱いで能力の発揮はされません" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="首都について" HorizontalAlignment="Center"/>
-      <TextBlock Text="首都は領土内で内政値が一番高い土地に自動で設定されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都は、陣営中央がある場所で、陣営の各種ポストの人物は首都に在籍し、出撃の起点になります" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都から接続されている領土内で内政値が首都より高いところがあれば、そこに移転されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都が陥落した際は、首都から接続されている領土内で内政値が一番高い土地に移転されます" HorizontalAlignment="Center"/>
+      <TextBlock Text="もし陥落の際に首都から接続されている領土がなかった場合は、それ以外の領土で内政値が一番高い土地に移転されます" HorizontalAlignment="Center"/>
       <TextBlock Text="首都の内政値は1.5倍の値として総内政値に寄与されます" HorizontalAlignment="Center"/>
       <TextBlock Text="首都を攻められると首都エリアの地域防衛担当がまず防衛の戦闘、敗れれば首都の防衛ポストの人物が迎撃します" HorizontalAlignment="Center"/>
       <TextBlock Text="首都陥落時には中央所属(それぞれの地域にいる防衛担当・内政担当以外)の人物がそれぞれ50%の確率で戦死します" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都から接続されていない地域は、防衛担当と内政担当を異動させることができません" HorizontalAlignment="Center"/>
+      <TextBlock Text="侵攻は、首都から接続されている領土に隣接している他陣営地域のみ可能です" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="戦闘の判定について" HorizontalAlignment="Center"/>
       <TextBlock Text="領土の防衛は領土エリア毎の防衛担当が行います" HorizontalAlignment="Center"/>
@@ -186,8 +191,10 @@
       <TextBlock Text="ただし、他の役割に助力する際は発揮するランクが1つ下がります" HorizontalAlignment="Center"/>
       <TextBlock Text="元々の役割に戻すと発揮するランクも戻ります" HorizontalAlignment="Center"/>
       <StackPanel Height="5"/>
-      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="道の種類と太さについて" HorizontalAlignment="Center"/>
-      <TextBlock Text="陸路/水路、および３種類の太さが設定されていますが、現バージョンでは見た目だけの違いです" HorizontalAlignment="Center"/>
+      <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="道路について" HorizontalAlignment="Center"/>
+      <TextBlock Text="地域同士が道路で接続されている場合のみ隣接となります" HorizontalAlignment="Center"/>
+      <TextBlock Text="首都から自領土の中だけで接続が辿れる範囲のみ、人物の配置換えと行軍ができます" HorizontalAlignment="Center"/>
+      <TextBlock Text="※種類として陸路/水路、３段階の太さがありますが、見た目の違いのみ" HorizontalAlignment="Center"/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

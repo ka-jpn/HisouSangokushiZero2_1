@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
-using static HisouSangokushiZero2_1_Uno.Code.Storage;
 using CommanderType = HisouSangokushiZero2_1_Uno.Code.DefType.Commander;
 namespace HisouSangokushiZero2_1_Uno.Data.Language;
 internal static class Text {
@@ -86,6 +85,11 @@ internal static class Text {
   internal static string CountryNoExistStartingPersonText() => GameData.langText.CountryNoExistStartingPersonText();
   internal static string SelectCountryButtonText(ECountry? country) => GameData.langText.SelectCountryButtonText(country);
   internal static string PersonInfoText(GameState game, PersonId personId) => GameData.langText.PersonInfoText(game, personId);
+  internal static string LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => GameData.langText.LostAreaCharacterRemarkText(attackSide, targetArea);
+  internal static string GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => GameData.langText.GetAreaCharacterRemarkText(defenseSide, targetArea);
+  internal static string? PerishSideCharacterRemarkText(ECountry country) => GameData.langText.PerishSideCharacterRemarkText(country);
+  internal static string? AppearPersonCharacterRemarkText(List<PersonId> appearPersons) => GameData.langText.AppearPersonCharacterRemarkText(appearPersons);
+  internal static string? NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons) => GameData.langText.NaturalDeathPersonRemarkText(naturalDeathPersons);
   internal interface ILangText {
     internal string ProgressSaveText();
     internal string CompleteSaveText();
@@ -164,5 +168,10 @@ internal static class Text {
     internal string CountryNoExistStartingPersonText();
     internal string SelectCountryButtonText(ECountry? country);
     internal string PersonInfoText(GameState game, PersonId personId);
+    internal string LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea);
+    internal string GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea);
+    internal string? PerishSideCharacterRemarkText(ECountry country);
+    internal string? AppearPersonCharacterRemarkText(List<PersonId> appearPersons);
+    internal string? NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons);
   }
 }

@@ -115,4 +115,9 @@ internal class Ja:ILangText {
   string ILangText.CountryNoExistStartingPersonText() => "(人物はいません)";
   string ILangText.SelectCountryButtonText(ECountry? country) => country is ECountry.漢 or null ? $"({CountryText(country)}陣営は選べません)" : "プレイする";
   string ILangText.PersonInfoText(GameState game, PersonId personId) => $"{personId.Value}  {RoleToText(Person.GetPersonRole(game, personId))} ランク{Person.GetPersonRank(game, personId)} 齢{Turn.GetYear(game) - Person.GetPersonBirthYear(game, personId)}";
+  string ILangText.LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => $"{CountryText(attackSide)}に{targetArea}を奪われました";
+  string ILangText.GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => $"{CountryText(defenseSide)}領の{targetArea}が我々の傘下に入りました";
+  string? ILangText.PerishSideCharacterRemarkText(ECountry country) => country is not ECountry.漢 ? $"{CountryText(country)}陣営を滅亡させました" : null;
+  string? ILangText.AppearPersonCharacterRemarkText(List<PersonId> appearPersons) =>　appearPersons.Count != 0 ? $"{string.Join("と", appearPersons.Select(v => v.Value))}を登用しました" : null;
+  string? ILangText.NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons) => naturalDeathPersons.Count != 0 ? $"{string.Join("と", naturalDeathPersons.Select(v => v.Value))}が死去しました" : null;
 }

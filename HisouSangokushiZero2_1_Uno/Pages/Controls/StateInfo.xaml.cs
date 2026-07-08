@@ -1,22 +1,24 @@
 ﻿using HisouSangokushiZero2_1_Uno.Code;
+using HisouSangokushiZero2_1_Uno.Data;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using static HisouSangokushiZero2_1_Uno.Code.DefType;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class StateInfo:UserControl {
-  private Action nextButtonAction = () => { };
+  private Func<GameState, GameState> nextButtonAction = MyUtil.MyUtil.Identity<GameState>();
   internal const double baseContentHeight = 45;
   internal StateInfo() {
     InitializeComponent();
     MyInit(this);
     static void MyInit(StateInfo page) {
       page.Content.Height = baseContentHeight;
-      page.NextButton.Click += (_,_) => page.nextButtonAction();
+      page.NextButton.Click += (_,_) => GameData.game = page.nextButtonAction(GameData.game);
     }
   }
-  internal static void Show(StateInfo page,List<UIElement> InfoContents,string? buttonText,Action buttonAction) {
+  internal static void Show(StateInfo page,List<UIElement> InfoContents,string? buttonText,Func<GameState, GameState> buttonAction) {
     page.InfoContentsPanel.MySetChildren([.. InfoContents]);
     if(buttonText is {}) {
       page.NextButtonText.Text = buttonText;

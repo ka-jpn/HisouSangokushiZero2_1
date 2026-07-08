@@ -42,7 +42,7 @@ public sealed partial class Game:Page {
     MyInit(this);
     void MyInit(Game page) {
       AttachEvent(page);
-      SetCountryPostsPanel();
+      SetCountryPostsPanel(GameData.game);
       MapImage.Source = Image.GetSvgImageSource("Map",UIUtil.mapSize.Width*2,UIUtil.mapSize.Height*2);
       UIUtil.SwitchViewModeActions.Add(RefreshViewMode);
       UIUtil.ChangeScaleActions.Add(ResizeMap);
@@ -139,12 +139,12 @@ public sealed partial class Game:Page {
         InfoLayoutPanel.RenderTransform = new ScaleTransform() { ScaleX = mapScale, ScaleY = mapScale };
         InfoLayoutPanel.Width = InfoFramePanel.RenderSize.Width / mapScale;
       }
-      void SetCountryPostsPanel() {
+      void SetCountryPostsPanel(GameState game) {
         Dictionary<ERole, Color> countryRolePanelColorMap = new([
           new(ERole.Central,new Color(255,240,240,210)),new(ERole.Affair,new Color(255,240,240,240)),
             new(ERole.Defense,new Color(255,210,210,240)),new(ERole.Attack,new Color(255,240,210,210))
         ]);
-        Dictionary<ERole, Grid> rolePanelMap = countryRolePanelColorMap.ToDictionary(v => v.Key, v => CreateCountryPostPanel(v.Key, v.Value));
+        Dictionary<ERole, Grid> rolePanelMap = countryRolePanelColorMap.ToDictionary(v => v.Key, v => CreateCountryPostPanel(game, v.Key, v.Value));
         rolePanelMap.ToList().ForEach(v => v.Value.PointerEntered += (_, _) => UpdateCountryPostPanelZIndex(v.Key));
         countryPostPanelMap.Clear();
         rolePanelMap.ToList().ForEach(v => countryPostPanelMap.Add(v.Key, v.Value));
@@ -254,7 +254,7 @@ public sealed partial class Game:Page {
       Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => ShowEndGameInfo(game)
     };
     string? buttonText = Text.EndPhaseButtonText(game.Phase);
-    StateInfo.Show(StateInfoPanel,contents,buttonText,() => GameData.game = ButtonAction(GameData.game));
+    StateInfo.Show(StateInfoPanel,contents,buttonText,ButtonAction);
     GameState ButtonAction(GameState game) {
       animationTaskTokens.Clear();
       return game.Phase switch {
@@ -375,9 +375,9 @@ public sealed partial class Game:Page {
     }
     GameState EndPlanningPhase(GameState game) {
       ResetTurnUI();
-      return game.MyPipe(game => UpdateGame.AutoPutPostCPU(game,[ECountry.漢])).MyPipe(game => game with { Phase = Phase.Execution }).MyApply(UpdateAreaPanels).MyApply(ExecutionMoveFlag).MyPipe(ArmyAttack).MyApply(GameLog.UpdateLogMessageUI).MyApply(ShowCharacterRemark).MyPipe(ResetPlanningParam);
+      return game.MyPipe(ResetPlanningCharacterRemark).MyPipe(game => UpdateGame.AutoPutPostCPU(game,[ECountry.漢])).MyPipe(game => game with { Phase = Phase.Execution }).MyApply(UpdateAreaPanels).MyApply(ExecutionMoveFlag).MyPipe(ArmyAttack).MyApply(GameLog.UpdateLogMessageUI).MyApply(ShowCharacterRemark);
       void ResetTurnUI() => new List<UIElement>([CharacterRemarkPanel,CountryPostsPanel]).ForEach(v => UIUtil.SetVisibility(v,false));
-      static GameState ResetPlanningParam(GameState game) => game with { StartPlanningCharacterRemark = [] };
+      static GameState ResetPlanningCharacterRemark(GameState game) => game with { StartPlanningCharacterRemark = [] };
       void ExecutionMoveFlag(GameState game) {
         game.ArmyTargetMap.Where(v => v.Value != null && Country.IsSuccessAttack(game,v.Key)).ToDictionary(attackInfo => GetFlag(game,attackInfo.Key),attackInfo => CalcFlagMovePos(game,attackInfo)).MyApply(flagMap => MapAnimationElementsCanvas.MySetChildren([.. flagMap.Keys])).MyApply(flagMap => MoveFlags(flagMap));
         static Grid GetFlag(GameState game,ECountry attackCountry) {
@@ -460,11 +460,12 @@ public sealed partial class Game:Page {
       MapAnimationElementsCanvas.MySetChildren([]);
       UIUtil.SetVisibility(CharacterRemarkPanel,false);
       UIUtil.SetVisibility(CountryPostsPanel,true);
-      return game.MyPipe(UpdateGame.GameEndJudge).MyPipe(game => game.Phase is Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd ? game : game.MyPipe(NextTurn));
+      return game.MyPipe(UpdateGame.GameEndJudge).MyPipe(game => game.Phase is Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd ? game : game.MyPipe(NextTurn).MyPipe(UpdateGame.CalcArmyTarget));
       GameState NextTurn(GameState game) {
-        return game.MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(UpdateGame.Rest).MyApply(UpdateAreaPanels).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnWinCondUI).MyApply(GameLog.UpdateLogMessageUI).MyPipe(UpdateGame.GameEndJudge).MyApply(ShowCharacterRemark).MyPipe(ResetExecutionParam).MyPipe(UpdateGame.CalcArmyTarget);
+        return game.MyPipe(ResetExecutionCharacterRemark).MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(UpdateGame.Rest).MyApply(UpdateAreaPanels).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyPipe(UpdateInfo);
+        GameState UpdateInfo(GameState game) => game.MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnWinCondUI).MyApply(GameLog.UpdateLogMessageUI).MyPipe(UpdateGame.GameEndJudge).MyApply(ShowCharacterRemark);
       }
-      static GameState ResetExecutionParam(GameState game) => game with { ArmyTargetMap = [],StartExecutionCharacterRemark = [] };
+      static GameState ResetExecutionCharacterRemark(GameState game) => game with { StartExecutionCharacterRemark = [] };
     }
   }
   private Grid CreatePersonPutPanel(GameState game,Post post,string backText,StackPanel personPutInnerPanel) {
@@ -524,14 +525,14 @@ public sealed partial class Game:Page {
     Canvas.SetLeft(personPanel,e.GetCurrentPoint(MovePersonCanvas).Position.X - UIUtil.personPutSize.Width / 2);
     Canvas.SetTop(personPanel,e.GetCurrentPoint(MovePersonCanvas).Position.Y - UIUtil.personPutSize.Height / 2);
   }
-  private Grid CreateCountryPostPanel(ERole role,Color backColor) {
+  private Grid CreateCountryPostPanel(GameState game,ERole role,Color backColor) {
     return new Grid() { Width = countryPostPanelWidth, Background = backColor.ToBrush() }.MySetChildren([
       new StackPanel() {HorizontalAlignment = HorizontalAlignment.Center }.MySetChildren([
         new StackPanel() { Orientation = Orientation.Horizontal,HorizontalAlignment = HorizontalAlignment.Center }.MySetChildren([
           new TextBlock { Text = Text.RoleToText(role) },
           new Microsoft.UI.Xaml.Controls.Image { Source = Code.Image.GetSvgImageSource($"{role}",80,80),Width = BasicStyle.textHeight,Height = BasicStyle.textHeight,VerticalAlignment = VerticalAlignment.Center }
         ]),
-        CreateCountryPosts(GameData.game,role)
+        CreateCountryPosts(game,role)
       ])
     ]);
     StackPanel CreateCountryPosts(GameState game,ERole role) {

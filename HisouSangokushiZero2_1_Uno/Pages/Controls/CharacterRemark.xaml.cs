@@ -11,7 +11,6 @@ using static HisouSangokushiZero2_1_Uno.Code.DefType;
 using Image = HisouSangokushiZero2_1_Uno.Code.Image;
 using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Pages;
-
 internal sealed partial class CharacterRemark:UserControl {
   private static readonly double remarkFrameCornerRadius = 5;
   private static string nowPersonImageName = string.Empty;
@@ -33,7 +32,7 @@ internal sealed partial class CharacterRemark:UserControl {
     if(!contents.MyIsEmpty()) {
       page.PersonName.Text = newPersonImageName;
       page.RemarkText.Text = contents.FirstOrDefault() ?? string.Empty;
-      page.ButtonPanel.MySetChildren([CreateNextButton(page,game,[.. contents.Skip(1)])]);
+      page.ButtonPanel.MySetChildren([CreateNextButton(page,[.. contents.Skip(1)])]);
       parent?.MyApply(page.ResizeElem);
       if(nowPersonImageName != newPersonImageName) {
         page.PersonImage.Source = Image.GetSvgImageSource($"Person/{newPersonImageName}",personImageSize*2,personImageSize*2);
@@ -43,10 +42,10 @@ internal sealed partial class CharacterRemark:UserControl {
     } else {
       UIUtil.SetVisibility(page,false);
     }
-    static Button CreateNextButton(CharacterRemark page,GameState game,string[] remainContents) {
+    static Button CreateNextButton(CharacterRemark page,string[] remainContents) {
       return new Button { HorizontalAlignment = HorizontalAlignment.Stretch,VerticalAlignment = VerticalAlignment.Stretch,Background = Colors.FromARGB(34,0,0,0) }.MySetChild(new TextBlock { Text = remainContents.MyIsEmpty() ? "閉じる" : "次へ" }).MyApply(button =>
         button.Click += (_,_) => {
-          GameState newGameState = game.Phase == Phase.Planning ? game with { StartPlanningCharacterRemark = remainContents } : game.Phase == Phase.Execution ? game with { StartExecutionCharacterRemark = remainContents }: game;
+          GameState newGameState = GameData.game.MyPipe(game => game.Phase == Phase.Planning ? game with { StartPlanningCharacterRemark = remainContents } : game.Phase == Phase.Execution ? game with { StartExecutionCharacterRemark = remainContents }: game);
           GameData.game = newGameState;
           Show(page,newGameState);
         }

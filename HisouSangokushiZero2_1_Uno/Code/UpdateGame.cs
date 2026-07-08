@@ -16,17 +16,21 @@ internal static class UpdateGame {
     Dictionary<ECountry,Dictionary<PersonId,PersonData>> findPersonMap = game.CountryMap.Keys.Where(v => !Country.IsPerish(game,v)).Select(country => (country, (appearPersonMap.GetValueOrDefault(country) ?? []).Count == 0 ? Person.FindPerson(game,country) : [])).ToDictionary();
     List<string?> appendLog = [
       ..game.CountryMap.Keys.SelectMany(country=> new List<string?>([
-      appearPersonMap.GetValueOrDefault(country)?.MyPipe(countryAppearPerson => Text.AppearPersonText(country,[..countryAppearPerson.Keys])),
-      findPersonMap.GetValueOrDefault(country)?.MyPipe(countryfindPerson => Text.FindPersonText(country,[.. countryfindPerson.Keys]))
-    ]))
+        appearPersonMap.GetValueOrDefault(country)?.MyPipe(countryAppearPerson => Text.AppearPersonText(country,[..countryAppearPerson.Keys])),
+        findPersonMap.GetValueOrDefault(country)?.MyPipe(countryfindPerson => Text.FindPersonText(country,[.. countryfindPerson.Keys]))
+      ]))
     ];
     return appearPersonMap.Values.SelectMany(v => v).ToDictionary().MyPipe(v => SetPersonPost(game,v)).MyPipe(game => game with {
       PersonMap = game.PersonMap.Concat(findPersonMap.Values.SelectMany(v => v)).ToDictionary(),
       CountryMap = game.CountryMap.ToDictionary(v => v.Key,v => findPersonMap.GetValueOrDefault(v.Key)?.Count != 0 ? v.Value with { AnonymousPersonNum = v.Value.AnonymousPersonNum + 1 } : v.Value),
-    }).MyPipe(game => AppendLogMessage(game,appendLog));
+    }).MyPipe(game => AppendLogMessage(game,appendLog)).MyPipe(game => game.PlayCountry?.MyPipe(v => AppearPersonRemark(game,[..findPersonMap.GetValueOrDefault(v)?.Keys.ToArray()??[], ..appearPersonMap.GetValueOrDefault(v)?.Keys.ToArray()??[]])) ?? game);
+    static GameState AppearPersonRemark(GameState game,List<PersonId> appearPersons) => AppendStartPlanningRemark(game,[Text.AppearPersonCharacterRemarkText(appearPersons)]);
   }
   internal static GameState PutWaitPersonPost(GameState game) => game.CountryMap.Keys.SelectMany(country => Enum.GetValues<ERole>().SelectMany(role => Post.GetPutWaitPost(game,country,role))).ToDictionary().MyPipe(v => SetPersonPost(game,v));
-  internal static GameState RemoveNaturalDeathPersonPost(GameState game,int year,int inYear) => game.CountryMap.Keys.Select(country => (country, Enum.GetValues<ERole>().SelectMany(role => Person.GetNaturalDeathPostPersonMap(game,country,role,year,inYear).Keys))).ToDictionary().MyPipe(deathPersons => RemoveDeathPersonPost(game,[.. deathPersons.Values.SelectMany(v => v)],[.. deathPersons.Select(v => Text.NaturalDeathPersonText(v.Key,[.. v.Value]))]));
+  internal static GameState RemoveNaturalDeathPersonPost(GameState game, int year, int inYear){
+    return game.CountryMap.Keys.Select(country => (country, Enum.GetValues<ERole>().SelectMany(role => Person.GetNaturalDeathPostPersonMap(game, country, role, year, inYear).Keys).ToList())).ToDictionary().MyPipe(deathPersonMap => RemoveDeathPersonPost(game, [.. deathPersonMap.Values.SelectMany(v => v)], [.. deathPersonMap.Select(v => Text.NaturalDeathPersonText(v.Key, [.. v.Value]))]).MyPipe(game => AppendNaturalDeathRemark(game, deathPersonMap)));
+    static GameState AppendNaturalDeathRemark(GameState game, Dictionary<ECountry,List<PersonId>> naturalDeathPersonMap) => AppendStartPlanningRemark(game, [Text.NaturalDeathPersonRemarkText([.. game.PlayCountry?.MyPipe(naturalDeathPersonMap.GetValueOrDefault) ?? []])]);
+  }
   internal static GameState RemoveWarDeathBureaucracyPersonPost(GameState game,EArea area,List<PersonId> deathPersons) => RemoveDeathPersonPost(game,deathPersons,[Text.WarDeathBureaucracyPersonText(area,deathPersons)]);
   internal static GameState RemoveWarDeathCommanderPersonPost(GameState game,ERole role,ECountry? enemy,List<PersonId> deathPersons) => RemoveDeathPersonPost(game,deathPersons,[Text.BattleDeathCommanderPersonText(role,deathPersons,enemy)]);
   private static GameState RemoveDeathPersonPost(GameState game,List<PersonId> deathPersons,List<string?> appendLog) => RemovePersonPost(game,deathPersons).MyPipe(game => AppendLogMessage(game,appendLog));
@@ -64,23 +68,26 @@ internal static class UpdateGame {
     static GameState Win(GameState game,ECountry attackSide,EArea target,Army defense) => ChangeHasCountry(game,attackSide,defense.Country,target).MyPipe(game => SleepCountry(game,attackSide,1));
     static GameState Lose(GameState game,ECountry attackSide,EArea target) => SleepCountry(game,attackSide,1).MyPipe(game => DamageArea(game,target));
     static GameState Rout(GameState game,ECountry attackSide,EArea target,Army attack,Army defense) => DeathCommander(game,attack,ERole.Attack,defense.Country).MyPipe(game => SleepCountry(game,attackSide,3)).MyPipe(game => DamageArea(game,target));
-    static GameState ChangeHasCountry(GameState game,ECountry attackCountry,ECountry? defenseSide,EArea targetArea) {
-      return AppendChangeHasCountryLog(game,attackCountry,defenseSide,targetArea).MyPipe(game => UpdateAreaMap(game,attackCountry,targetArea)).MyPipe(game => DeathBureaucracy(game,defenseSide,targetArea)).MyPipe(game => MakeEmptyPost(game,targetArea)).MyPipe(game => IsPerishCountry(game,targetArea,defenseSide) ? PerishCountry(game,attackCountry,defenseSide,targetArea) : IsFallCapital(game,targetArea,defenseSide) && defenseSide != null ? FallCapital(game,defenseSide.Value,targetArea) : game).MyPipe(game => FallArea(game,attackCountry,defenseSide,targetArea));
+    static GameState ChangeHasCountry(GameState game,ECountry attackSide,ECountry? defenseSide,EArea targetArea) {
+      return AppendChangeHasCountryLog(game,attackSide,defenseSide,targetArea).MyPipe(game => UpdateAreaMap(game,attackSide,targetArea)).MyPipe(game => DeathBureaucracy(game,defenseSide,targetArea)).MyPipe(game => MakeEmptyPost(game,targetArea)).MyPipe(game => defenseSide?.MyPipe(v => IsPerishCountry(game,targetArea,v) ? PerishSide(game,attackSide,v,targetArea) : IsFallCapital(game,targetArea,v) ? FallCapital(game,v,targetArea) : game) ?? game).MyPipe(game => FallArea(game,attackSide,defenseSide,targetArea));
       static GameState UpdateAreaMap(GameState game,ECountry attackCountry,EArea targetArea) => game with { AreaMap = game.AreaMap.MyUpdate(targetArea,(_,areaInfo) => areaInfo with { Country = attackCountry }) };
       static GameState DeathBureaucracy(GameState game,ECountry? defenseSide,EArea area) {
         List<PersonId> deathPersons = [.. game.PersonMap.Where(v => v.Value.Post?.MyPipe(v => v.PostKind.MaybeArea == area && v.PostRole != ERole.Defense) ?? false).Select(v => v.Key).Where(_ => MyRandom.RandomJudge(0.25))];
-        return RemoveWarDeathBureaucracyPersonPost(game,area,deathPersons).MyPipe(game => AppendLog(game,defenseSide,area,deathPersons));
-        static GameState AppendLog(GameState game,ECountry? defenseSide,EArea area,List<PersonId> deathPersons) => defenseSide == game.PlayCountry ? AppendGameLog(game,[Text.WarDeathBureaucracyPersonText(area,deathPersons)]).MyPipe(game => AppendStartPlanningRemark(game,[Text.WarDeathBureaucracyPersonCharacterRemarkText(area,deathPersons)])) : game;
+        return RemoveWarDeathBureaucracyPersonPost(game,area,deathPersons).MyPipe(game => defenseSide == game.PlayCountry ? AppendDeathPersonLog(game,area,deathPersons) : game);
+        static GameState AppendDeathPersonLog(GameState game,EArea area,List<PersonId> deathPersons) => AppendGameLog(game,[Text.WarDeathBureaucracyPersonText(area,deathPersons)]).MyPipe(game => AppendStartPlanningRemark(game,[Text.WarDeathBureaucracyPersonCharacterRemarkText(area,deathPersons)]));
       }
       static GameState MakeEmptyPost(GameState game,EArea targetArea) => game with { PersonMap = game.PersonMap.ToDictionary(v => v.Key,v => v.Value.Post?.PostKind == new PostKind(targetArea) ? v.Value with { Post = v.Value.Post with { PostKind = new() } } : v.Value) };
       static bool IsPerishCountry(GameState game,EArea targetArea,ECountry? defenseSide) => defenseSide?.MyPipe(country => Country.GetAreaNum(game,country)) == 0;
       static bool IsFallCapital(GameState game,EArea targetArea,ECountry? defenseSide) => defenseSide?.MyPipe(game.CountryMap.GetValueOrDefault)?.CapitalArea == targetArea;
-      static GameState PerishCountry(GameState game,ECountry attackCountry,ECountry? defenseSide,EArea area) {
-        List<PersonId> defenseCountryPerson = [.. defenseSide?.MyPipe(country => Enum.GetValues<ERole>().SelectMany(role => Person.GetAlivePersonMap(game,country,role)).Select(v => v.Key)) ?? []];
-        return game.MyPipe(game => AppendTurnNewLog(game,[Text.PerishCountryText(defenseSide)])).MyPipe(game => AppendLogMessage(game,[Text.PerishCountryText(defenseSide)])).MyPipe(game => AppendGameLog(game,[Text.PerishCountryText(defenseSide)])).MyPipe(game => RemoveWarDeathBureaucracyPersonPost(game,area,defenseCountryPerson)).MyPipe(game => defenseSide?.MyPipe(country => game with { CountryMap = game.CountryMap.MyUpdate(country,(_,info) => info with { PerishFrom = attackCountry }) }) ?? game);
+      static GameState PerishSide(GameState game,ECountry attackSide,ECountry defenseSide,EArea area) {
+        return game.MyPipe(game => AppendLogs(game,defenseSide)).MyPipe(game => RemoveWarDeathBureaucracyPersonPost(game,area,GetDefenseSidePerson(game,defenseSide))).MyPipe(game => AttachPerishFrom(game,defenseSide,attackSide)).MyPipe(game => attackSide == game.PlayCountry ? AppendPerishToRemark(game,defenseSide) : game);
+        static List<PersonId> GetDefenseSidePerson(GameState game,ECountry? defenseSide) => [.. defenseSide?.MyPipe(country => Enum.GetValues<ERole>().SelectMany(role => Person.GetAlivePersonMap(game,country,role)).Select(v => v.Key)) ?? []];
+        static GameState AppendLogs(GameState game,ECountry? defenseSide) => AppendLogMessage(game,[Text.PerishCountryText(defenseSide)]).MyPipe(game => AppendTurnNewLog(game,[Text.PerishCountryText(defenseSide)])).MyPipe(game => AppendGameLog(game,[Text.PerishCountryText(defenseSide)]));
+        static GameState AttachPerishFrom(GameState game,ECountry? defenseSide,ECountry attackSide) => defenseSide?.MyPipe(country => game with { CountryMap = game.CountryMap.MyUpdate(country,(_,info) => info with { PerishFrom = attackSide }) }) ?? game;
+        static GameState AppendPerishToRemark(GameState game,ECountry defenseSide) => AppendStartPlanningRemark(game,[Text.PerishSideCharacterRemarkText(defenseSide)]);
       }
-      static GameState AppendChangeHasCountryLog(GameState game,ECountry attackCountry,ECountry? defenseCountry,EArea targetArea) {
-        return AppendLogMessage(game,[Text.ChangeHasCountryText(attackCountry,defenseCountry,targetArea)]).MyPipe(game => AppendTurnNewLog(game,[Text.ChangeHasCountryText(attackCountry,defenseCountry,targetArea)]));
+      static GameState AppendChangeHasCountryLog(GameState game,ECountry attackSide,ECountry? defenseSide,EArea targetArea) {
+        return AppendLogMessage(game,[Text.ChangeHasCountryText(attackSide,defenseSide,targetArea)]).MyPipe(game => AppendTurnNewLog(game,[Text.ChangeHasCountryText(attackSide,defenseSide,targetArea)])).MyPipe(game => defenseSide == game.PlayCountry ? AppendStartPlanningRemark(game,[Text.LostAreaCharacterRemarkText(attackSide,targetArea)]) : game).MyPipe(game => attackSide == game.PlayCountry ? AppendStartPlanningRemark(game,[Text.GetAreaCharacterRemarkText(defenseSide,targetArea)]) : game);
       }
       static GameState FallCapital(GameState game,ECountry country,EArea area) {
         List<PersonId> defenseCountryCapitalPersons = [.. Enum.GetValues<ERole>().SelectMany(role => Person.GetAlivePersonMap(game,country,role)).Where(v => v.Value.Post?.PostKind.MaybeArea == null).Select(v => v.Key)];
