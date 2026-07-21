@@ -93,6 +93,12 @@
               <TextBlock Text="・キャラクターが自陣営の領土の増減や人物登用の際などにも発言するようにした"/>
               <TextBlock Text="・蜀之南征シナリオの人物列伝を部分的に追加した"/>
             </StackPanel>
+            <TextBlock Text="2026/07/21 ver1.23 勝利条件を制覇ポイント制に＆関連調整"/>
+            <StackPanel Padding="20,0,0,0">
+              <TextBlock Text="・勝利条件を制覇ポイント制にした、制覇率40%以上を3ターンで勝利に"/>
+              <TextBlock Text="・関連して勝利条件など説明テキストを修正"/>
+              <TextBlock Text="・蜀之南征シナリオ開始時の薊、代、南皮、魯、劇の内政値を下方修正"/>
+            </StackPanel>
           </StackPanel>
         </StackPanel>
       </ScrollViewer>

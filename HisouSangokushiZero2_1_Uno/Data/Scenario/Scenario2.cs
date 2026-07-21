@@ -18,19 +18,19 @@ internal class Scenario2:ScenarioBase.IScenario {
     Road[] addRoads = [new(EArea.成都,EArea.魚復,RoadKind.Land,2),new(EArea.臨湘,EArea.南城,RoadKind.Land,1),new(EArea.龍編,EArea.林邑, RoadKind.Land,1)];
     EArea[] chinaAreas = ScenarioBase.CalcChinaAreas(areaDiffs,removeChinaAreas,addChinaAreas);
     Road[] roads = ScenarioBase.CalcRoads(areaDiffs,addRoads);
-    return new(startYear,endYear,chinaAreas,roads,GenerateAreaMap(),GenerateWinCondMap(chinaAreas),GenerateCountryDataMap(),GeneratePersonDataMap());
+    return new(startYear,endYear,chinaAreas,roads,GenerateAreaMap(),GenerateFillDreamConditionMap(chinaAreas),GenerateCountryDataMap(),GeneratePersonDataMap());
   }
   private static Dictionary<EArea,AreaData> GenerateAreaMap() => new([
     new(EArea.襄平,new(new Point(7,1),new AffairsParam(50,30),ECountry.燕)),
     new(EArea.番汗,new(new Point(8,1),new AffairsParam(10,8),ECountry.燕)),
     new(EArea.朝鮮,new(new Point(8,2),new AffairsParam(20,8),ECountry.燕)),
     new(EArea.陽楽,new(new Point(6,1.1),new AffairsParam(20,6),ECountry.魏)),
-    new(EArea.薊,new(new Point(5,1),new AffairsParam(60,25),ECountry.魏)),
-    new(EArea.代,new(new Point(4,1),new AffairsParam(35,15),ECountry.魏)),
-    new(EArea.南皮,new(new Point(5,2),new AffairsParam(110,55),ECountry.魏)),
-    new(EArea.魯,new(new Point(5,3),new AffairsParam(80,40),ECountry.魏)),
+    new(EArea.薊,new(new Point(5,1),new AffairsParam(60,15),ECountry.魏)),
+    new(EArea.代,new(new Point(4,1),new AffairsParam(35,10),ECountry.魏)),
+    new(EArea.南皮,new(new Point(5,2),new AffairsParam(110,45),ECountry.魏)),
+    new(EArea.魯,new(new Point(5,3),new AffairsParam(80,35),ECountry.魏)),
     new(EArea.晋陽,new(new Point(4,2),new AffairsParam(50,20),ECountry.魏)),
-    new(EArea.劇,new(new Point(6,2.9),new AffairsParam(60,30),ECountry.魏)),
+    new(EArea.劇,new(new Point(6,2.9),new AffairsParam(60,25),ECountry.魏)),
     new(EArea.淮陰,new(new Point(6,4),new AffairsParam(70,20),ECountry.魏)),
     new(EArea.陰陵,new(new Point(5,4),new AffairsParam(60,20),ECountry.魏)),
     new(EArea.離石,new(new Point(3,2),new AffairsParam(20,10),ECountry.南匈奴)),
@@ -97,7 +97,7 @@ internal class Scenario2:ScenarioBase.IScenario {
     new(EArea.目支,new(new Point(8,3),new AffairsParam(10,6),ECountry.馬韓)),
     new(EArea.首里,new(new Point(8,7),new AffairsParam(10,2),ECountry.琉球)),
   ]);
-  private static Dictionary<ECountry,CountryWinCondition> GenerateWinCondMap(EArea[] chinaAreas) => new([
+  private static Dictionary<ECountry,CountryFillDreamCondition> GenerateFillDreamConditionMap(EArea[] chinaAreas) => new([
     new(ECountry.魏,new(
       new(["呉が滅亡","蜀漢が滅亡","中華領域の65%以上領有"],["※蜀漢を滅亡させたら10%緩和","※呉を滅亡させたら5%緩和"]),
       (game)=>Country.IsPerish(game,ECountry.呉)&&Country.IsPerish(game,ECountry.蜀漢)&&chinaAreas.MyPipe(v=>v.Length*(0.65-(Country.GetPerishFrom(game,ECountry.蜀漢)==ECountry.魏?0.1:0)-(Country.GetPerishFrom(game,ECountry.呉)==ECountry.魏?0.05:0))<=Country.HasAreaCount(game,ECountry.魏,v)),

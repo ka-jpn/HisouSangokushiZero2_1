@@ -8,7 +8,7 @@ internal static class GetGame {
   internal static GameState GetInitGameScenario(ScenarioId? scenario) {
     return GetScenario(scenario).MyPipe(maybeScenarioInfo => InitGame(scenario, maybeScenarioInfo)).MyPipe(InitState).MyPipe(AppendStartMessage).MyPipe(InitMaxAreaNum);
       static ScenarioData? GetScenario(ScenarioId? newScenario) => newScenario?.MyPipe(ScenarioBase.GetScenarioData);
-      static GameState InitGame(ScenarioId? scenario,ScenarioData? scenarioInfo) => new(scenario,scenarioInfo?.AreaMap.ToDictionary() ?? [],scenarioInfo?.CountryMap.ToDictionary() ?? [],scenarioInfo?.PersonMap.ToDictionary() ?? [],null,null,0,Phase.Starting,[],false,[],[],[],[],[],[]);
+      static GameState InitGame(ScenarioId? scenario,ScenarioData? scenarioInfo) => new(scenario,scenarioInfo?.AreaMap.ToDictionary() ?? [],scenarioInfo?.CountryMap.ToDictionary() ?? [],scenarioInfo?.PersonMap.ToDictionary() ?? [],null,null,0,Phase.Starting,[],false,[],[],[],scenarioInfo?.CountryMap.ToDictionary(v=>v.Key,_=>FillDream.None)??[],scenarioInfo?.CountryMap.ToDictionary(v=>v.Key,_=>0)??[],[],[],[],[]);
       static GameState InitState(GameState game) => game.MyPipe(UpdateGame.UpdateCapitalArea).MyPipe(UpdateGame.InitAlivePersonPost).MyPipe(game => UpdateGame.AutoPutPostCPU(game,[])).MyPipe(ClearAllLog);
       static GameState ClearAllLog(GameState game) => game with { GameLog = [],LogMessage = [],TurnNewLog = [],StartPlanningCharacterRemark = [],StartExecutionCharacterRemark = [] };
       static GameState AppendStartMessage(GameState game) => UpdateGame.AppendLogMessage(game,[$"{BaseData.name.Value} ver.{BaseData.version.Value}"]);

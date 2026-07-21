@@ -5,14 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class ExInfo:UserControl {
-  private enum ExInfoState { Explain, WinCond, ParamList, ProductionInfo, Setting };
+  private enum ExInfoState { Explain, FillDream, ParamList, ProductionInfo, Setting };
   private static readonly Dictionary<ExInfoState,UserControl> exInfoStateMap = [];
   internal ExInfo() {
     InitializeComponent();
     MyInit();
     void MyInit() {
       Explain.Init(InfoContentPanel);
-      WinCond.Init(InfoContentPanel);
+      FillDreamCondition.Init(InfoContentPanel);
       ParamList.Init(InfoContentPanel);
       ProductionInfo.Init(InfoContentPanel);
       Setting.Init(InfoContentPanel);
@@ -20,7 +20,7 @@ internal sealed partial class ExInfo:UserControl {
       LoadPage();
       void AttachEvent() {
         ExplainButton.Click += (_,_) => SwitchInfoButton(ExInfoState.Explain);
-        WinCondButton.Click += (_,_) => SwitchInfoButton(ExInfoState.WinCond);
+        FillDreamConditionButton.Click += (_,_) => SwitchInfoButton(ExInfoState.FillDream);
         ParamListButton.Click += (_,_) => SwitchInfoButton(ExInfoState.ParamList);
         ProductionInfoButton.Click += (_,_) => SwitchInfoButton(ExInfoState.ProductionInfo);
         SettingButton.Click += (_,_) => SwitchInfoButton(ExInfoState.Setting);
@@ -32,7 +32,7 @@ internal sealed partial class ExInfo:UserControl {
         void ChangeButtonColor() {
           Dictionary<ExInfoState, Button> buttonMap = new([
             new(ExInfoState.Explain,ExplainButton),
-            new(ExInfoState.WinCond,WinCondButton),
+            new(ExInfoState.FillDream,FillDreamConditionButton),
             new(ExInfoState.ParamList,ParamListButton),
             new(ExInfoState.ProductionInfo,ProductionInfoButton),
             new(ExInfoState.Setting,SettingButton)
@@ -49,7 +49,7 @@ internal sealed partial class ExInfo:UserControl {
           }
           static UserControl CreateInfoPanel(ExInfoState state) => state switch {
             ExInfoState.Explain => new Explain(),
-            ExInfoState.WinCond => new WinCond(),
+            ExInfoState.FillDream => new FillDreamCondition(),
             ExInfoState.ParamList => new ParamList(),
             ExInfoState.ProductionInfo => new ProductionInfo(),
             ExInfoState.Setting => new Setting()

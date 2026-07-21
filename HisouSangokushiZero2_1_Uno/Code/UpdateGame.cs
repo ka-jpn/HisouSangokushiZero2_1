@@ -1,5 +1,6 @@
 using HisouSangokushiZero2_1_Uno.Data.Scenario;
 using HisouSangokushiZero2_1_Uno.MyUtil;
+using HisouSangokushiZero2_1_Uno.Pages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ internal static class UpdateGame {
     }
   }
   internal static GameState PayAttackFunds(GameState game,ECountry country) => game with { CountryMap = game.CountryMap.MyUpdate(country,(_,countryInfo) => countryInfo with { Fund = countryInfo.Fund - Country.CalcAttackFund(game,country) }) };
-  internal static GameState AppendGameLog(GameState game,List<string?> appendMessages) => game with { GameLog = [.. game.GameLog,.. appendMessages.MyNonNull().Select(v => $"{Text.GetCalendarText(game)}:{v}")] };
+  internal static GameState AppendGameLog(GameState game,List<string?> appendMessages) => game with { GameLog = [.. game.GameLog,.. appendMessages.MyNonNull().Select(v => $"{Text.GetCalendarText(game.NowScenario,game.PlayTurn ?? 0)}:{v}")] };
   internal static GameState AppendLogMessage(GameState game,List<string?> appendMessages) => game with { LogMessage = [.. game.LogMessage,.. appendMessages.MyNonNull()] };
   internal static GameState AppendTurnNewLog(GameState game,List<string?> appendMessages) => game with { TurnNewLog = [.. game.TurnNewLog,.. appendMessages.MyNonNull()] };
   internal static GameState AppendStartPlanningRemark(GameState game,List<string?> appendMessages) => game with { StartPlanningCharacterRemark = [.. game.StartPlanningCharacterRemark ?? [],.. appendMessages.MyNonNull()] };
@@ -142,13 +143,30 @@ internal static class UpdateGame {
     }
     static GameState AddTurnHeadLog(GameState game) => AppendLogMessage(game,[Text.TurnHeadLogText(game)]);
   }
+  internal static GameState UpdateFillDreamCondition(GameState game) {
+    Dictionary<ECountry, FillDream> newFillDreamsValue = game.FillDreams.ToDictionary(v => v.Key, v => game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.FillDreamConditionMap.GetValueOrDefault(v.Key)?.JudgeFunc(game) is false ? FillDream.None : FillDream.Passed);
+    List<ECountry> fillDreamSides = [.. game.FillDreams.Where(v=>v.Value == FillDream.None && newFillDreamsValue.GetValueOrDefault(v.Key) == FillDream.Passed).Select(v=>v.Key)];
+    List<ECountry> lostDreamSides = [.. game.FillDreams.Where(v=>v.Value == FillDream.Passed && newFillDreamsValue.GetValueOrDefault(v.Key) == FillDream.None).Select(v=>v.Key)];
+    List<string?> message = [Text.FillDreamCountrysText(fillDreamSides),Text.LostDreamCountrysText(lostDreamSides)];
+    List<string?> fillDreamRemark = [Text.FillDreamAnotherCountrysRemarkText([.. fillDreamSides.Where(v => v != game.PlayCountry)]),fillDreamSides.MyNullable().Contains(game.PlayCountry) ? Text.FillDreamRemarkText(): null];
+    List<string?> lostDreamRemark = [Text.LostDreamAnotherCountrysRemarkText([.. lostDreamSides.Where(v => v != game.PlayCountry)]),lostDreamSides.MyNullable().Contains(game.PlayCountry) ? Text.LostDreamRemarkText(): null];
+    return (game with { FillDreams = newFillDreamsValue }).MyPipe(v => AppendLogMessage(v,message)).MyPipe(v => AppendTurnNewLog(v,message)).MyPipe(v => AppendGameLog(v,message)).MyPipe(v => AppendStartPlanningRemark(v,[.. fillDreamRemark,.. lostDreamRemark]));
+  }
+  internal static GameState UpdateHegemonyTurn(GameState game){
+    List<ECountry> addHegemonyTurnCountry = [.. HegemonyPoint.hegemonyPoints.Where(v=>IsHegemony(v.Value)).Select(v=>v.Key)];
+    Dictionary<ECountry,int> newHegemonyTurns = game.HegemonyTurns.ToDictionary(v => v.Key,v => v.Value + (addHegemonyTurnCountry.Contains(v.Key) ? 1 : 0));
+    List<string?> hegemonyAnotherCountrysRemarkText = [.. Enumerable.Range(1,2).Select(count=>Text.HegemonyAnotherCountrysRemarkText(count,[.. addHegemonyTurnCountry.Where(v => v != game.PlayCountry && newHegemonyTurns.GetValueOrDefault(v) == count)]))];
+    List<string?> hegemonyRemarkText = [addHegemonyTurnCountry.MyNullable().Contains(game.PlayCountry) ? game.PlayCountry?.MyPipe(newHegemonyTurns.GetValueOrDefault).MyPipe(Text.HegemonyRemarkText) : null];
+    return (game with { HegemonyTurns = newHegemonyTurns }).MyPipe(game => AppendStartPlanningRemark(game,[.. hegemonyAnotherCountrysRemarkText,.. hegemonyRemarkText]));
+  }
+  internal static bool IsHegemony(double hegemonyPoint) => hegemonyPoint >= HegemonyPoint.totalHegemonyPoint * 0.4;
   internal static GameState GameEndJudge(GameState game) {
     return SetWinCountrys(game).MyPipe(game => IsPerish(game) ? PerishEnd(game) : IsWinEnd(game) ? WinEnd(game) : IsOtherWinEnd(game) ? OtherWinEnd(game) : IsTurnLimitOver(game) ? TurnLimitOverEnd(game) : game);
-    static GameState SetWinCountrys(GameState game) => game with { WinCountrys = [.. game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.WinConditionMap.Where(WinCondInfo => WinCondInfo.Value.JudgeFunc(game)).Select(v => v.Key) ?? []] };
-    static GameState WinEnd(GameState game) => (game with { Phase = Phase.WinEnd }).MyPipe(game => AppendGameLog(game, [.. Text.WinEndText(game)]));
-    static GameState OtherWinEnd(GameState game) => (game with { Phase = Phase.OtherWinEnd }).MyPipe(game => AppendGameLog(game, [.. Text.OtherWinEndText(game)]));
-    static GameState PerishEnd(GameState game) => (game with { Phase = Phase.PerishEnd }).MyPipe(game => AppendGameLog(game, [.. Text.PerishEndText(game)]));
-    static GameState TurnLimitOverEnd(GameState game) => (game with { Phase = Phase.TurnLimitOverEnd }).MyPipe(game => AppendGameLog(game, [.. Text.TurnLimitOverEndText(game)]));
+    static GameState SetWinCountrys(GameState game) => game with { WinCountrys = [.. game.HegemonyTurns.Where(v => v.Value >= 3).Select(v => v.Key)] };
+    static GameState WinEnd(GameState game) => (game with { Phase = Phase.WinEnd }).MyPipe(game => AppendGameLog(game, [Text.WinEndText(game)]));
+    static GameState OtherWinEnd(GameState game) => (game with { Phase = Phase.OtherWinEnd }).MyPipe(game => AppendGameLog(game, [Text.OtherWinEndText(game)]));
+    static GameState PerishEnd(GameState game) => (game with { Phase = Phase.PerishEnd }).MyPipe(game => AppendGameLog(game, [Text.PerishEndText(game)]));
+    static GameState TurnLimitOverEnd(GameState game) => (game with { Phase = Phase.TurnLimitOverEnd }).MyPipe(game => AppendGameLog(game, [Text.TurnLimitOverEndText(game)]));
     static bool IsWinEnd(GameState game) => game.PlayCountry?.MyPipe(game.WinCountrys.Contains) ?? false;
     static bool IsOtherWinEnd(GameState game) => !IsWinEnd(game) && game.WinCountrys.Length != 0;
     static bool IsTurnLimitOver(GameState game) => Turn.GetYear(game) >= game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.EndYear;
@@ -168,12 +186,12 @@ internal static class UpdateGame {
   internal static GameState Rest(GameState game) => game with { CountryMap = game.CountryMap.ToDictionary(v => v.Key,v => Country.IsSleep(game,v.Key) && game.ArmyTargetMap.GetValueOrDefault(v.Key) is null ? v.Value with { SleepTurnNum = v.Value.SleepTurnNum - 1 } : v.Value)};
   internal static GameState CalcArmyTarget(GameState game) {
     Dictionary<ECountry,EArea?> playerArmyTargetMap = new(game.PlayCountry is ECountry player ? [new(player,null)]:[]);
-    Dictionary<ECountry,EArea?> NPCArmyTargetMap = game.CountryMap.Keys.Except(game.PlayCountry.MyMaybeToList()).Where(country => !Country.IsSleep(game,country)).ToDictionary(country => country,country => country == ECountry.漢 ? null : RandomSelectNPCAttackTarget(game,country));
+    Dictionary<ECountry,EArea?> NPCArmyTargetMap = game.CountryMap.Keys.Where(v => Country.GetAreaNum(game,v) >= 1).Except(game.PlayCountry.MyMaybeToList()).Where(country => !Country.IsSleep(game,country)).ToDictionary(country => country,country => country == ECountry.漢 ? null : RandomSelectNPCAttackTarget(game,country));
     return game with { ArmyTargetMap = new([.. NPCArmyTargetMap,.. playerArmyTargetMap]) };
     static EArea? RandomSelectNPCAttackTarget(GameState game,ECountry country) {
       List<EArea> targetAreas = Area.GetCellEachAdjacentAnotherCountryAreas(game,country);
       Dictionary<EArea,int> targetAreaCountMap = targetAreas.CountBy(v => v).ToDictionary();
-      List<EArea?> selectWeightTargetAreas = [.. targetAreaCountMap.SelectMany(v => Enumerable.Repeat(v.Key,v.Value * v.Value)).MyNullable().Append(null)];
+      List<EArea?> selectWeightTargetAreas = [.. targetAreaCountMap.SelectMany(v => Enumerable.Repeat(v.Key,v.Value * v.Value * (Country.GetAreaCountry(game,v.Key)?.MyPipe(v => game.FillDreams.GetValueOrDefault(v) is FillDream.Passed || IsHegemony(HegemonyPoint.hegemonyPoints.GetValueOrDefault(v))) is true ? 10 :1))).MyNullable().Append(null)];
       return selectWeightTargetAreas.MyPickAny().MyPipe(area => area?.MyPipe(game.AreaMap.GetValueOrDefault)?.Country == null && MyRandom.RandomJudge(0.9) ? null : area);
     }
   }

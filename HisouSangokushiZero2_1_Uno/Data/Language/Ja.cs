@@ -10,7 +10,6 @@ using static HisouSangokushiZero2_1_Uno.Data.Language.Text;
 using Commander = HisouSangokushiZero2_1_Uno.Code.DefType.Commander;
 using Country = HisouSangokushiZero2_1_Uno.Code.Country;
 namespace HisouSangokushiZero2_1_Uno.Data.Language;
-
 internal class Ja:ILangText {
   string ILangText.ProgressSaveText() => "セーブ中..";
   string ILangText.CompleteSaveText() => "セーブ完了";
@@ -18,12 +17,14 @@ internal class Ja:ILangText {
   string ILangText.CompleteLoadText(ReadGame read) => read.MaybeGame is { } ? "ロード完了" : read.ReadState == ReadState.Read ? "ロード失敗：ファイルが破損しています" : "ロード失敗：ファイルが見つかりません";
   string ILangText.ProgressInitText() => "ゲームを初期化しています..";
   string ILangText.CompleteInitText() => "ゲームを初期化しました";
-  string ILangText.StartPlayText(ECountry? country) => $"{country}でプレイ開始";
-  string ILangText.StartPlayCountryPersonsText(GameState game) => game.PlayCountry?.MyPipe(country => string.Join(',', Enum.GetValues<ERole>().SelectMany(role => Person.GetInitPersonMap(game, country, role)).Select(v => v.Key.Value))) ?? "初期人物なし";
-  string[] ILangText.WinEndText(GameState game) => [$"達成勝利\n最終陣営所属人物 {string.Join(',', game.PlayCountry?.MyPipe(country => Enum.GetValues<ERole>().SelectMany(role => Person.GetAlivePersonMap(game, country, role))).Select(v => v.Key.Value) ?? [])}"];
-  string[] ILangText.OtherWinEndText(GameState game) => [$"{string.Join("と", game.WinCountrys)}の勝利", $"他陣営達成勝利による敗北\n最終領土数 {game.PlayCountry?.MyPipe(country => Country.GetAreaNum(game, country))}"];
-  string[] ILangText.PerishEndText(GameState game) => [$"滅亡敗北\n{game.PlayCountry?.MyPipe(game.CountryMap.GetValueOrDefault)?.PerishFrom}に滅ぼされた"];
-  string[] ILangText.TurnLimitOverEndText(GameState game) => [$"存続勝利\n最終領土数 {game.PlayCountry?.MyPipe(country => Country.GetAreaNum(game, country))}"];
+  string? ILangText.FillDreamCountrysText(List<ECountry> fillDreamSides) => fillDreamSides.Count != 0 ? $"{string.Join("と", fillDreamSides.MyNullable().Select(CountryText))}が悲願を達成" : null;
+  string? ILangText.LostDreamCountrysText(List<ECountry> lostDreamSides) => lostDreamSides.Count != 0 ? $"{string.Join("と", lostDreamSides.MyNullable().Select(CountryText))}が悲願達成状態を失う" : null;
+  string ILangText.StartPlayText(ECountry? country) => $"{CountryText(country)}でプレイ開始";
+  string ILangText.StartPlayCountryPersonsText(GameState game) => (game.PlayCountry?.MyPipe(country => Enum.GetValues<ERole>().SelectMany(role => Person.GetInitPersonMap(game, country, role)).Select(v => v.Key.Value))??[]).MyPipe(v => v.Any() ? string.Join(',', v) : "初期人物なし");
+  string ILangText.WinEndText(GameState game) => $"唱覇勝利\n最終陣営所属人物 {(game.PlayCountry?.MyPipe(country => Enum.GetValues<ERole>().SelectMany(role => Person.GetAlivePersonMap(game, country, role))).Select(v => v.Key.Value) ?? []).MyPipe(v => v.Any() ? string.Join(',', v) : "なし")}";
+  string ILangText.OtherWinEndText(GameState game) => $"{string.Join("と", game.WinCountrys)}の勝利\n他陣営唱覇勝利による敗北\n最終領土数 {game.PlayCountry?.MyPipe(country => Country.GetAreaNum(game, country))}";
+  string ILangText.PerishEndText(GameState game) => $"滅亡敗北\n{game.PlayCountry?.MyPipe(game.CountryMap.GetValueOrDefault)?.PerishFrom}に滅ぼされた";
+  string ILangText.TurnLimitOverEndText(GameState game) => $"存続勝利\n最終領土数 {game.PlayCountry?.MyPipe(country => Country.GetAreaNum(game, country))}";
   string ILangText.CountryText(ECountry? country) => country?.ToString() ?? "自治";
   string ILangText.CommanderToText(Commander commander) => commander.MainPerson == null && commander.SubPerson == null ? "無名武官" : $"{commander.MainPerson?.Value ?? "無名武官"}と{commander.SubPerson?.Value ?? "無名武官"}";
   string ILangText.CalcCountryInvadeText(InvadeText textInfo) => $"{textInfo.Attack.Country}の{textInfo.Attack.Commander}(ランク{textInfo.Attack.Rank})が{textInfo.Field}にて{(textInfo.DefenseSideFocusDefense ? "防衛専念の" : null)}{textInfo.Defense.Country}の中央軍の{textInfo.Defense.Commander}(ランク{textInfo.Defense.Rank})に攻撃して{GetAttackJudgeText(textInfo.Judge)}";
@@ -42,7 +43,7 @@ internal class Ja:ILangText {
   string ILangText.FallCapitalText(ECountry? country) => $"{CountryText(country)}の首都が陥落";
   string ILangText.PerishCountryText(ECountry? country) => $"{CountryText(country)}が滅亡";
   string ILangText.AppendUpdateMaxAreaNumLog(int? updatedMaxAreaNum, ECountry? defenseSide, EArea targetArea) => $"{CountryText(defenseSide)}領の{targetArea}を攻略して最大領土数を{updatedMaxAreaNum}に更新";
-  string ILangText.TurnHeadLogText(GameState game) => $"------------{GetCalendarText(game) ?? ""}------------";
+  string ILangText.TurnHeadLogText(GameState game) => $"------------{GetCalendarText(game.NowScenario,game.PlayTurn ?? 0) ?? ""}------------";
   string? ILangText.FallPlayerCapitalText(EArea? capital) => capital != null ? $"首都の{capital}が陥落" : null;
   string? ILangText.FallPlayerCapitalDeathPersonText(List<PersonId> deathPersons) => !deathPersons.MyIsEmpty() ? $"首都の陥落により{string.Join("と", deathPersons.Select(v => v.Value))}が死亡" : null;
   string? ILangText.BattleDeathPersonCharacterRemarkText(ERole role, List<PersonId> deathPersons, ECountry? enemy) => !deathPersons.MyIsEmpty() ? $"{(role == ERole.Attack ? $"{CountryText(enemy)}領に侵攻" : $"{CountryText(enemy)}軍の侵攻を守備")}した{string.Join("と", deathPersons.Select(v => v.Value))}が戦死しました" : null;
@@ -53,8 +54,8 @@ internal class Ja:ILangText {
   string[] ILangText.StartPlanningCharacterRemarkTexts(GameState game) {
     return game.PlayTurn == 0 ? [
       "ゲームの説明を聞きますか？\n勝利条件・敗北条件と\n戦闘のルールの説明があります",
-      $"勝利条件は2種類あります\n陣営毎の勝利条件を一番乗り達成で達成勝利\nまたは{game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.EndYear}年春まで存続で存続勝利\nとなります、どちらも勝利ではありますが\n区別があることに留意してください",
-      "敗北条件は2種類で\n陣営毎の勝利条件を他陣営に先に達成される\nおよび全領土失陥となります\nまた、我々の命運も共にありますので\nどうかできるだけ多くの生存者を\n後まで導いて頂きますよう",
+      $"勝利条件は2種類あります\n制覇ポイント率が40%越えを3回達成で唱覇勝利\nまたは{game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.EndYear}年春まで存続で存続勝利\nとなります、どちらも勝利ではありますが\n区別があることに留意してください",
+      "敗北条件は2種類で\n唱覇勝利を他陣営に先に達成される\nおよび全領土失陥となります\nまた、我々の命運も共にありますので\nどうかできるだけ多くの生存者を\n後まで導いて頂きますよう",
       "戦闘のうち攻撃は首都から行軍可能な範囲ででき\n中央所属のうち攻撃の筆頭と次席のポスト\nの者が指揮し、能力差が勝敗率に影響します\n侵攻先が防衛に専念していると分が悪くなります\n無暗に攻撃することばかりが手段ではありません",
       "戦闘のうち防衛は地域毎に行われ\n侵攻された所を担当している者が防衛にあたり\n首都が侵攻され首都地域の防衛が破られると\n中央所属の防衛の筆頭と次席のポストの者が\n首都中央で応戦します\n我らが防衛に専念していると分が良くなります",
       "もし首都が落ちると仕えている我々に死者が出\n運営に支障をきたすことも考えられます\n首都の防衛は一層のご考慮が必要になる\nことでしょう",
@@ -79,15 +80,15 @@ internal class Ja:ILangText {
   }
   string ILangText.StartExecutionFailAttackCharacterRemarkText(EArea targetArea) => $"{targetArea}への侵攻は\n資金不足のため中止されました";
   string ILangText.GetRemarkPersonName(ECountry? country, bool isAliveCharacter) => isAliveCharacter ? country switch { ECountry.魏 => "杜畿", ECountry.呉 => "韓当", ECountry.蜀漢 => "簡雍", _ => "武官" } : "文官";
-  string ILangText.NoBasicWinCondText() => "選べません(勝利条件なし)";
+  string ILangText.NoFillDreamConditionText() => "選べません(勝利条件なし)";
   string ILangText.AreaPostDefenseText() => "防";
   string ILangText.AreaPostAffairText() => "政";
   string ILangText.CountryFocusDefenseText() => "(防)";
   string ILangText.CountrySleepText(GameState game,ECountry country) => $"休み {Country.GetSleepTurn(game,country)}";
   string ILangText.AreaText(EArea area, ECountry? country) => $"{area} {CountryText(country)}領";
   string ILangText.PlayerCountryPostText(PostKind postKind) => postKind.MaybeHead switch { PostHead.Main => "筆頭", PostHead.Sub => "次席", _ => $"{postKind.MaybePostNo + 1}" };
-  string? ILangText.GetCalendarText(GameState game) => $"{Turn.GetYear(game)}年 {Turn.GetCalendarInYear(game) switch { YearItems.Spring => "春", YearItems.Summer => "夏", YearItems.Autumn => "秋", YearItems.Winter => "冬" }}";
-  string ILangText.WinCondCaptionText(GameState game) => $"勝利条件({GetCalendarText(game)})";
+  string ILangText.GetCalendarText(ScenarioId? scenario,int turn) => $"{Turn.GetYear(scenario,turn)}年 {Turn.GetCalendarInYear(turn) switch { YearItems.Spring => "春", YearItems.Summer => "夏", YearItems.Autumn => "秋", YearItems.Winter => "冬" }}";
+  string ILangText.FillDreamConditionCaptionText(GameState game) => $"悲願({GetCalendarText(game.NowScenario,game.PlayTurn ?? 0)})";
   string ILangText.ScenarioCaptionText() => "シナリオ";
   string ILangText.StartYearText(ScenarioData scenarioData) => $"{scenarioData.StartYear}年開始";
   string ILangText.EndYearText(ScenarioData scenarioData) => $"{scenarioData.EndYear}年終了";
@@ -103,15 +104,15 @@ internal class Ja:ILangText {
   string ILangText.CountryInFundParamText(GameState game, ECountry? country) => $"収入:{Country.GetInFund(game, country):0.####}";
   string ILangText.PlayCountryArmyTargetAreaParamText(GameState game) => $"侵攻:{Country.GetArmyTargetArea(game, game.PlayCountry)?.ToString() ?? "なし"}";
   string ILangText.GameEndText() => "ゲーム終了";
-  string ILangText.GameResultText(GameState game) => $"結果:{game.Phase switch { Phase.PerishEnd => "滅亡敗北", Phase.TurnLimitOverEnd => "存続勝利", Phase.WinEnd => "条件勝利", Phase.OtherWinEnd => "他陣営条件勝利敗北", _ => string.Empty }}";
+  string ILangText.GameResultText(GameState game) => $"結果:{game.Phase switch { Phase.PerishEnd => "滅亡敗北", Phase.TurnLimitOverEnd => "存続勝利", Phase.WinEnd => "唱覇勝利", Phase.OtherWinEnd => "他陣営唱覇勝利敗北", _ => string.Empty }}";
   string ILangText.GameEndLogCaptionText() => "ゲームログ";
   string ILangText.PostGameEndLogText() => "ゲームコメントを投稿する";
   string ILangText.AutoPutPersonButtonText() => "オート配置";
   string ILangText.CountryInitInfoCaptionText() => "[陣営初期情報]";
-  string ILangText.CountryWinCondCaptionText() => "[勝利条件]";
+  string ILangText.CountryFillDreamConditionCaptionText() => "[悲願]";
   string ILangText.CountryInitPersonCaptionText() => "[初期人物]";
   string? ILangText.ScenarioCaptionText(ScenarioId? scenarioId) => scenarioId?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(v=>$"シナリオ:{scenarioId.Value}({v.StartYear}年開始 {v.EndYear}年終了)");
-  string ILangText.CountryWinCondHeadText() => "以下の条件を全て満たす";
+  string ILangText.CountryFillDreamConditionHeadText() => "以下の条件を全て満たす";
   string ILangText.CountryNoExistStartingPersonText() => "(人物はいません)";
   string ILangText.SelectCountryButtonText(ECountry? country) => country is ECountry.漢 or null ? $"({CountryText(country)}陣営は選べません)" : "プレイする";
   string ILangText.PersonInfoText(GameState game, PersonId personId) => $"{personId.Value}  {RoleToText(Person.GetPersonRole(game, personId))} ランク{Person.GetPersonRank(game, personId)} 齢{Turn.GetYear(game) - Person.GetPersonBirthYear(game, personId)}";
@@ -120,4 +121,13 @@ internal class Ja:ILangText {
   string? ILangText.PerishSideCharacterRemarkText(ECountry country) => country is not ECountry.漢 ? $"{CountryText(country)}陣営を滅亡させました" : null;
   string? ILangText.AppearPersonCharacterRemarkText(List<PersonId> appearPersons) =>　appearPersons.Count != 0 ? $"{string.Join("と", appearPersons.Select(v => v.Value))}を登用しました" : null;
   string? ILangText.NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons) => naturalDeathPersons.Count != 0 ? $"{string.Join("と", naturalDeathPersons.Select(v => v.Value))}が死去しました" : null;
+  string? ILangText.FillDreamAnotherCountrysRemarkText(List<ECountry> sides) => sides.Count != 0 ? $"{string.Join("と",sides.MyNullable().Select(CountryText))}が悲願を達成したようです" : null;
+  string ILangText.FillDreamRemarkText() => $"我々は悲願を達成しました";
+  string? ILangText.LostDreamAnotherCountrysRemarkText(List<ECountry> sides) => sides.Count != 0 ? $"{string.Join("と",sides.MyNullable().Select(CountryText))}の悲願は未達成状態になりました" : null;
+  string ILangText.LostDreamRemarkText() => $"我々の悲願は未達成状態になりました";
+  string? ILangText.HegemonyAnotherCountrysRemarkText(int hegemonyTurn,List<ECountry> hegemony1TurnSides) =>hegemony1TurnSides.Count != 0 ?  $"{string.Join("と",hegemony1TurnSides)}は{hegemonyTurn}回目の覇を宣言しました！\n{hegemonyTurn switch {
+      1 => "3回宣言した陣営が勝利になります",
+      2 => "あと1回先に宣言されると我らは敗北になります",
+      _=> null}}":null;
+  string? ILangText.HegemonyRemarkText(int hegemonyTurn) => hegemonyTurn != 0 ? $"我々は唱覇条件を満たしています！\n{hegemonyTurn}回目の覇を宣言しました！\n3回宣言で勝利！" : null;
 }

@@ -7,8 +7,11 @@
     <StackPanel x:Name="ContentPanel" Padding="2">
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="勝利・敗北について" HorizontalAlignment="Center"/>
       <StackPanel HorizontalAlignment="Center">
-        <TextBlock Text="勝利条件：陣営勝利条件を一番乗りで達成(達成勝利) or ゲーム終了年春まで存続(存続勝利)"/>
-        <TextBlock Text="敗北条件：プレイヤー勢力領土全失陥(滅亡敗北) or 陣営勝利条件をCPUに先に達成される(他陣営達成勝利敗北)"/>
+        <TextBlock Text="勝利条件：制覇ポイント率が40%越えを3回達成(唱覇勝利) or ゲーム終了年春まで存続(存続勝利)"/>
+        <TextBlock Text="敗北条件：プレイヤー勢力領土全失陥(滅亡敗北) or 唱覇勝利をCPUに先に達成される(他陣営唱覇勝利敗北)"/>
+      <TextBlock Text="※領土エリア数と総内政値により制覇ポイントが算出" HorizontalAlignment="Center"/>
+      <TextBlock Text="※漢が生存＆洛陽所持で100ポイント加算" HorizontalAlignment="Center"/>
+      <TextBlock Text="※陣営毎に設定された悲願を達成で500ポイント加算" HorizontalAlignment="Center"/>
       </StackPanel>
       <StackPanel Height="5"/>
       <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="陣営の軍議・行動フェイズ順について" HorizontalAlignment="Center"/>

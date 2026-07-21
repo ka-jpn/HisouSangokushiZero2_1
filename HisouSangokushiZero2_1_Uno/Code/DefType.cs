@@ -8,8 +8,8 @@ public static class DefType {
   internal record TaskToken();
   [MessagePackObject(true)] public record Point(double X,double Y);
   [MessagePackObject(true)] public record Color(byte A,byte R,byte G,byte B);
-  internal record WinCondMessage(string[]? Basic,string[]? Extra);
-  internal record CountryWinCondition(WinCondMessage Messages,Func<GameState,bool> JudgeFunc,Func<GameState,Dictionary<string,bool?>> ProgressExplainFunc);
+  internal record FillDreamConditionMessage(string[]? Basic,string[]? Extra);
+  internal record CountryFillDreamCondition(FillDreamConditionMessage Messages,Func<GameState,bool> JudgeFunc,Func<GameState,Dictionary<string,bool?>> ProgressExplainFunc);
   [MessagePackObject(true)] public record AreaData(Point Position,AffairsParam AffairParam,ECountry? Country);
   [MessagePackObject(true)] public record CountryData(decimal Fund,int NavyLevel,Color ViewColor,int SleepTurnNum,int AnonymousPersonNum,int? MaxAreaNum = null,EArea? CapitalArea = null,ECountry? PerishFrom = null);
   [MessagePackObject(true)] public record PersonData(ERole Role,int Rank,int BirthYear,int DeathYear,ECountry Country,int? GameAppearYear = null,int? GameDeathTurn = null,Post? Post = null);
@@ -18,7 +18,7 @@ public static class DefType {
   [MessagePackObject(true)] public record Post(ERole PostRole,PostKind PostKind);
   [MessagePackObject(true)] public record AffairsParam(decimal AffairsMax,decimal AffairNow);
   [MessagePackObject(true)] public record MetaData(ScenarioId? NowScenario,ECountry? PlayCountry,int? PlayTurn,TimeSpan TotalPlayTime,DateTime LastSaveDate,int SlotNo,string GameVersion);
-  [MessagePackObject(true)] public record GameState(ScenarioId? NowScenario,Dictionary<EArea,AreaData> AreaMap,Dictionary<ECountry,CountryData> CountryMap,Dictionary<PersonId,PersonData> PersonMap,ECountry? PlayCountry,int? PlayTurn,int PlayerMaxCellNum,Phase Phase,Dictionary<ECountry,EArea?> ArmyTargetMap,bool IsTurnProcessing,List<string> LogMessage,List<string> TurnNewLog,List<string> GameLog,ECountry[] WinCountrys,string[] StartPlanningCharacterRemark,string[] StartExecutionCharacterRemark);
+  [MessagePackObject(true)] public record GameState(ScenarioId? NowScenario,Dictionary<EArea,AreaData> AreaMap,Dictionary<ECountry,CountryData> CountryMap,Dictionary<PersonId,PersonData> PersonMap,ECountry? PlayCountry,int? PlayTurn,int PlayerMaxCellNum,Phase Phase,Dictionary<ECountry,EArea?> ArmyTargetMap,bool IsTurnProcessing,List<string> LogMessage,List<string> TurnNewLog,List<string> GameLog,Dictionary<ECountry,FillDream> FillDreams,Dictionary<ECountry,int> HegemonyTurns,ECountry[] WinCountrys,string[] StartPlanningCharacterRemark,string[] StartExecutionCharacterRemark,string[] GameEndCharacterRemark);
   [MessagePackObject(true)] public record PostKind(PostHead? MaybeHead,int? MaybePostNo,EArea? MaybeArea) {
     public PostKind(PostHead head) : this(head,null,null) { }
     public PostKind(int postNo) : this(null,postNo,null) { }
@@ -29,7 +29,7 @@ public static class DefType {
   internal record Army(ECountry? Country,Commander Commander,decimal Rank);
   internal record AttackResult(Army Defense,AttackJudge Judge,string InvadeText);
   internal record Road(EArea From,EArea To,RoadKind Kind,int Easiness,int? EasinessReverse = null);
-  internal record ScenarioData(int StartYear,int EndYear,EArea[] ChinaAreas,Road[] RoadConnections,IReadOnlyDictionary<EArea,AreaData> AreaMap,IReadOnlyDictionary<ECountry,CountryWinCondition> WinConditionMap,IReadOnlyDictionary<ECountry,CountryData> CountryMap,IReadOnlyDictionary<PersonId,PersonData> PersonMap);
+  internal record ScenarioData(int StartYear,int EndYear,EArea[] ChinaAreas,Road[] RoadConnections,IReadOnlyDictionary<EArea,AreaData> AreaMap,IReadOnlyDictionary<ECountry,CountryFillDreamCondition> FillDreamConditionMap,IReadOnlyDictionary<ECountry,CountryData> CountryMap,IReadOnlyDictionary<PersonId,PersonData> PersonMap);
   internal enum Lang { Ja, En };
   public enum PostHead { Main, Sub };
   public enum Phase { Starting, Planning, Execution, PerishEnd, TurnLimitOverEnd, WinEnd, OtherWinEnd };
@@ -38,6 +38,7 @@ public static class DefType {
   public enum ERole { Central, Affair, Defense, Attack };
   internal enum YearItems { Spring, Summer, Autumn, Winter };
   internal enum ReadState { NotFind, Read };
+  public enum FillDream { None, Passed };
   internal record ReadGame(ReadState ReadState, GameState? MaybeGame);
   internal record ReadMeta(ReadState ReadState, MetaData? MaybeMeta);
   public enum EArea {

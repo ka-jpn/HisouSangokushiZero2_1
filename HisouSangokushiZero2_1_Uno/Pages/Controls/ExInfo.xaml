@@ -21,8 +21,8 @@
       <Button Grid.Column="0" x:Name="ExplainButton" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#AFFF" BorderBrush="Black" BorderThickness="2" Padding="0">
         <TextBlock Text="ルール詳細"/>
       </Button>
-      <Button Grid.Column="1" x:Name="WinCondButton" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#AFFF" BorderBrush="Black" BorderThickness="2" Padding="0">
-        <TextBlock Text="各陣営の勝利条件"/>
+      <Button Grid.Column="1" x:Name="FillDreamConditionButton" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#AFFF" BorderBrush="Black" BorderThickness="2" Padding="0">
+        <TextBlock Text="各陣営悲願"/>
       </Button>
       <Button Grid.Column="2" x:Name="ParamListButton" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#AFFF" BorderBrush="Black" BorderThickness="2" Padding="0">
         <TextBlock Text="人物・陣営データ"/>

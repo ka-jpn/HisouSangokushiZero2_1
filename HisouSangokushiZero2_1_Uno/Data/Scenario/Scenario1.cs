@@ -13,7 +13,7 @@ internal class Scenario1:ScenarioBase.IScenario {
     Road[] addRoads = [];
     EArea[] chinaAreas = ScenarioBase.CalcChinaAreas(areaDiffs,removeChinaAreas,addChinaAreas);
     Road[] roads = ScenarioBase.CalcRoads(areaDiffs,addRoads);
-    return new(startYear,endYear,chinaAreas,roads,GenerateAreaMap(),GenerateWinCondMap(chinaAreas),GenerateCountryDataMap(),GeneratePersonDataMap());
+    return new(startYear,endYear,chinaAreas,roads,GenerateAreaMap(),GenerateFillDreamConditionMap(chinaAreas),GenerateCountryDataMap(),GeneratePersonDataMap());
   }
   private static Dictionary<EArea,AreaData> GenerateAreaMap() => new([
     new(EArea.襄平,new(new Point(7,1),new AffairsParam(50,15),ECountry.公孫度)),
@@ -92,7 +92,7 @@ internal class Scenario1:ScenarioBase.IScenario {
     new(EArea.目支,new(new Point(8,3),new AffairsParam(10,6),ECountry.馬韓)),
     new(EArea.首里,new(new Point(8,7),new AffairsParam(10,2),ECountry.琉球))
   ]);
-  private static Dictionary<ECountry,CountryWinCondition> GenerateWinCondMap(EArea[] chinaAreas) => new([
+  private static Dictionary<ECountry,CountryFillDreamCondition> GenerateFillDreamConditionMap(EArea[] chinaAreas) => new([
     new(ECountry.漢,new(new(null,null),(game)=>false,(game)=>[])),
     new(ECountry.公孫度,new(
       new(["西暦210年以降","13都市以上領有"],["※西暦210年以降4年毎1都市緩和","※襄平を領有していたら2都市緩和"]),

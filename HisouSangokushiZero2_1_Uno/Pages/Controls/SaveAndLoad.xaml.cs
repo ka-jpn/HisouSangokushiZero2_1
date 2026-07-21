@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Uno.Extensions.Specialized;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
+using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record SaveSlotData(int SlotIndex,SaveSlotMetaData? MetaData,string? SaveInfoText,Visibility DeleteButtonVisibility);
 internal record SaveSlotMetaData(string GameVersion,string? NowScenario,string? PlayCountry,string? PlayTurn,string TotalPlayTime,string LastSaveDate);
@@ -42,7 +43,7 @@ public sealed partial class SaveAndLoad:UserControl {
           GameVersion: $"ゲームバージョン：{meta.GameVersion}",
           NowScenario: $"シナリオ：{meta.NowScenario?.Value}",
           PlayCountry: $"プレイ国名：{meta.PlayCountry?.ToString() ?? "(選択前)"}",
-          PlayTurn: $"ターン数：{meta.PlayTurn?.ToString() ?? "(開始前)"}",
+          PlayTurn: $"暦：{meta.PlayTurn?.MyPipe(turn => Text.GetCalendarText(meta.NowScenario,turn)) ?? "(開始前)"}",
           TotalPlayTime: $"プレイ時間：{Math.Floor(meta.TotalPlayTime.TotalMinutes)}分",
           LastSaveDate: $"最終保存：{meta.LastSaveDate:yyyy/MM/dd HH:mm}"
         ),
@@ -98,16 +99,18 @@ public sealed partial class SaveAndLoad:UserControl {
         if (hasSaveDataList.ElementAtOrDefault(slotData.SlotIndex)) {
           GameData.startingPlayTotalTime = saveSlots.ElementAtOrDefault(slotData.SlotIndex)?.MaybeMeta?.TotalPlayTime ?? TimeSpan.Zero;
           ReadGame read = await Storage.ReadStorageData(IndexToFileNo(slotData.SlotIndex));
-          ReadGame attached = read with { MaybeGame = read.MaybeGame?.MyPipe(game => ParseGameVersion(saveSlots.ElementAtOrDefault(slotData.SlotIndex)?.MaybeMeta?.GameVersion).MyPipe(version => {
-            if(version.main is null or <=1 && version.sub is null or <=17) { return game.MyPipe(FillRequireState).MyPipe(FillFixTypoState).MyPipe(AttachArmyTarget); }
-            if(version.main is null or <=1 && version.sub is null or <=20) { return game.MyPipe(FillFixTypoState).MyPipe(AttachArmyTarget); }
-            return game;
+          ReadGame attached = read with { MaybeGame = read.MaybeGame?.MyPipe(game => ParseGameVersion(saveSlots.ElementAtOrDefault(slotData.SlotIndex)?.MaybeMeta?.GameVersion).MyPipe(version => version switch {
+            (null or <=1,null or <=17) => game.MyPipe(FillRequireState_1_18).MyPipe(FillFixTypoState_1_21).MyPipe(FillRequireState_1_23).MyPipe(AttachArmyTarget_1_21),
+            (null or <=1,null or <=20) => game.MyPipe(FillFixTypoState_1_21).MyPipe(FillRequireState_1_23).MyPipe(AttachArmyTarget_1_21),
+            (null or <=1,null or <=22) => game.MyPipe(FillRequireState_1_23),
+            _ => game
           }))};
           pressSlotAfterProcess(attached);
         }
-        static GameState FillRequireState(GameState game) => game with { LogMessage = game.LogMessage ?? [], StartPlanningCharacterRemark = game.StartPlanningCharacterRemark ?? [], StartExecutionCharacterRemark = game.StartExecutionCharacterRemark ?? [] }; //バージョン1.17以前にnullableだったのをnotnullに
-        static GameState FillFixTypoState(GameState game) => game with { TurnNewLog = game.TurnNewLog ?? [] }; //バージョン1.20以前のタイポを修正、変数名が変わった
-        static GameState AttachArmyTarget(GameState game) => game.PlayCountry is not null ? UpdateGame.CalcArmyTarget(game) : game;//バージョン1.20以前のNPCの行動がユーザー行動後だった、ユーザー行動前になったので整合
+        static GameState FillRequireState_1_18(GameState game) => game with { LogMessage = game.LogMessage ?? [], StartPlanningCharacterRemark = game.StartPlanningCharacterRemark ?? [], StartExecutionCharacterRemark = game.StartExecutionCharacterRemark ?? [] }; //バージョン1.17以前にnullableだったのをnotnullに
+        static GameState FillFixTypoState_1_21(GameState game) => game with { TurnNewLog = game.TurnNewLog ?? [] }; //バージョン1.20以前のタイポを修正、変数名が変わった
+        static GameState AttachArmyTarget_1_21(GameState game) => game.PlayCountry is not null ? UpdateGame.CalcArmyTarget(game) : game;//バージョン1.20以前のNPCの行動がユーザー行動後だった、ユーザー行動前になったので整合
+        static GameState FillRequireState_1_23(GameState game) => game with { FillDreams = game.CountryMap.ToDictionary(v => v.Key,_ => FillDream.None) ?? [], HegemonyTurns = game.CountryMap.ToDictionary(v => v.Key,_ => 0) ?? [], GameEndCharacterRemark = game.GameEndCharacterRemark ?? []  }; //バージョン1.22以前になかったパラメータを増設
         static (int? main,int? sub) ParseGameVersion(string? versionText) => versionText?.Split('.').MyPipe(v=>(v.ElementAtOrDefault(0)?.MyPipe(int.Parse),v.ElementAtOrDefault(1)?.MyPipe(int.Parse))) ?? (null,null);
       }
     }

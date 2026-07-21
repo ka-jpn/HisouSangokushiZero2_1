@@ -106,7 +106,9 @@ public sealed partial class Game:Page {
       }
       void ResizeMap() {
         double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * GetZoomFactor();
-        StateInfo.ResizeElem(StateInfoPanel, UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 }), mapScaleFactor);
+        double horizontalScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
+        StateInfo.ResizeElem(StateInfoPanel, horizontalScaleFactor, mapScaleFactor);
+        HegemonyPoint.ResizeElem(HegemonyPointPanel, horizontalScaleFactor, mapScaleFactor);
         RelayoutCountryPostUI(mapScaleFactor);
         if (mapScaleFactor != lastScaleFactor) {
           RescaleMap(mapScaleFactor);
@@ -125,9 +127,9 @@ public sealed partial class Game:Page {
           MapAnimationElementsCanvas.RenderTransform = mapScaleTransform;
           TurnLogPanel.Margin = new(UIUtil.infoFrameWidth * scaleFactor, 0, 0, 0);
           TurnLogPanel.RenderTransform = mapScaleTransform;
-          TurnWinCondPanel.Margin = new(UIUtil.infoFrameWidth * scaleFactor, UIUtil.infoFrameWidth * scaleFactor, 0, 0);
+          TurnFillDreamConditionPanel.Margin = new(UIUtil.infoFrameWidth * scaleFactor, UIUtil.infoFrameWidth * scaleFactor, 0, 0);
           MovePersonCanvas.RenderTransform = mapScaleTransform;
-          RescaleTurnWinCondPanelUI(scaleFactor);
+          RescaleTurnFillDreamConditionPanelUI(scaleFactor);
         }
         void RelayoutCountryPostUI(double scaleFactor) {
           double PostPanelLeftUnit = (MainGrid.RenderSize.Width / scaleFactor - countryPostPanelWidth) / (countryPostPanelMap.Count - 1);
@@ -171,6 +173,8 @@ public sealed partial class Game:Page {
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => GameLog.UpdateLogMessageUI(newGameState));
     await Task.Yield();
     await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => ShowCharacterRemark(newGameState));
+    await Task.Yield();
+    await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => HegemonyPoint.Show(HegemonyPointPanel,newGameState,UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 })));
     GameData.game = newGameState;
     GameData.startGameDateTime = DateTime.Now;
     void CleanUI(GameState game) {
@@ -261,7 +265,7 @@ public sealed partial class Game:Page {
         Phase.Starting => throw new Exception(),
         Phase.Planning => game.MyPipe(EndPlanningPhase).MyApply(UpdateCountryInfoPanel),
         Phase.Execution => game.MyPipe(EndExecutionPhase).MyApply(UpdateCountryInfoPanel),
-        Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => game.MyApply(ShowGameEndLogButtonClick)
+        Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => game.MyApply(ShowCharacterRemark).MyApply(ShowGameEndLogButtonClick)
       };
     }
     List<UIElement> ShowSelectScenario(GameState game) => [
@@ -301,7 +305,7 @@ public sealed partial class Game:Page {
       new Grid().MySetChildren([
         new StackPanel().MyApply(v=>Grid.SetColumn(v,0)),
         new StackPanel{ VerticalAlignment=VerticalAlignment.Center }.MySetChildren([
-          new TextBlock{ Text=Text.GetCalendarText(game) }, new TextBlock{ Text=Text.CountryParamCaptionText(game.PlayCountry) },
+          new TextBlock{ Text=Text.GetCalendarText(game.NowScenario,game.PlayTurn ?? 0) }, new TextBlock{ Text=Text.CountryParamCaptionText(game.PlayCountry) },
         ]).MyApply(v=>Grid.SetColumn(v,1)),
         new StackPanel().MyApply(v=>Grid.SetColumn(v,2)),
         new StackPanel{ VerticalAlignment=VerticalAlignment.Center }.MySetChildren([
@@ -344,7 +348,7 @@ public sealed partial class Game:Page {
       new Grid().MySetChildren([
         new StackPanel().MyApply(v=>Grid.SetColumn(v,0)),
         new StackPanel{ VerticalAlignment=VerticalAlignment.Center}.MySetChildren([
-          new TextBlock{ Text=Text.GetCalendarText(game) }, new TextBlock{ Text=Text.CountryParamCaptionText(game.PlayCountry) },
+          new TextBlock{ Text=Text.GetCalendarText(game.NowScenario,game.PlayTurn ?? 0) }, new TextBlock{ Text=Text.CountryParamCaptionText(game.PlayCountry) },
         ]).MyApply(v=>Grid.SetColumn(v,1)),
         new StackPanel().MyApply(v=>Grid.SetColumn(v,2)),
         new StackPanel{ VerticalAlignment=VerticalAlignment.Center}.MySetChildren([
@@ -444,7 +448,7 @@ public sealed partial class Game:Page {
         }
       }
       static GameState ArmyAttack(GameState game) {
-        return game.CountryMap.Keys.OrderBy(country => Country.GetTotalAffair(game,country)).Aggregate(game,(game,country) => {
+        return game.CountryMap.Keys.Where(v => Country.GetAreaNum(game,v) >= 1).OrderBy(country => Country.GetTotalAffair(game,country)).Aggregate(game,(game,country) => {
           return game.ArmyTargetMap.GetValueOrDefault(country) is EArea target ? TryAttack(game,country,target) : !Country.IsSleep(game,country) ? ExeDefense(game,country) : ExeSleep(game,country);
           static GameState TryAttack(GameState game,ECountry country,EArea targetArea) {
             return Country.IsSuccessAttack(game,country) ? ExeAttack(game,country,targetArea) : FailAttack(game,country,targetArea);
@@ -460,12 +464,23 @@ public sealed partial class Game:Page {
       MapAnimationElementsCanvas.MySetChildren([]);
       UIUtil.SetVisibility(CharacterRemarkPanel,false);
       UIUtil.SetVisibility(CountryPostsPanel,true);
-      return game.MyPipe(UpdateGame.GameEndJudge).MyPipe(game => game.Phase is Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd ? game : game.MyPipe(NextTurn).MyPipe(UpdateGame.CalcArmyTarget));
+      return game.MyPipe(NextTurn).MyPipe(UpdateGame.GameEndJudge).MyPipe(SwitchEnd);
       GameState NextTurn(GameState game) {
-        return game.MyPipe(ResetExecutionCharacterRemark).MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(UpdateGame.Rest).MyApply(UpdateAreaPanels).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyPipe(UpdateInfo);
-        GameState UpdateInfo(GameState game) => game.MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnWinCondUI).MyApply(GameLog.UpdateLogMessageUI).MyPipe(UpdateGame.GameEndJudge).MyApply(ShowCharacterRemark);
+        return game.MyPipe(ResetExecutionCharacterRemark).MyPipe(UpdateGame.NextTurn).MyPipe(v => v with { Phase = Phase.Planning }).MyPipe(UpdateGame.Rest).MyApply(UpdateAreaPanels).MyPipe(UpdateHegemonyPoint).MyPipe(game => UpdateGame.AppendStartPlanningRemark(game,[.. Text.StartPlanningCharacterRemarkTexts(game)])).MyPipe(UpdateInfo);
+        GameState UpdateHegemonyPoint(GameState game) => game.MyPipe(UpdateGame.UpdateFillDreamCondition).MyApply(game => HegemonyPoint.Show(HegemonyPointPanel,game,UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 }))).MyPipe(UpdateGame.UpdateHegemonyTurn);
+        GameState UpdateInfo(GameState game) => game.MyApply(UpdateCountryPosts).MyApply(UpdateTurnLogUI).MyApply(UpdateTurnFillDreamConditionUI).MyApply(GameLog.UpdateLogMessageUI).MyApply(ShowCharacterRemark);
+        static GameState ResetExecutionCharacterRemark(GameState game) => game with { StartExecutionCharacterRemark = [] };
       }
-      static GameState ResetExecutionCharacterRemark(GameState game) => game with { StartExecutionCharacterRemark = [] };
+      GameState SwitchEnd(GameState game){
+        return game.Phase switch {
+          Phase.PerishEnd => (game with { GameEndCharacterRemark = ["我らは拠り所を失いました\nもうすぐ追手が\nうわー"] }).MyApply(ShowCharacterRemark),
+          Phase.TurnLimitOverEnd => (game with { GameEndCharacterRemark = ["我らは覇を唱えることができませんでした\n次の世代に託しましょう"] }).MyApply(ShowCharacterRemark),
+          Phase.WinEnd => (game with { GameEndCharacterRemark = ["我らは覇を3回唱えました\n勝利です！\nこれからは安寧の世を目指しましょう"] }).MyApply(ShowCharacterRemark),
+          Phase.OtherWinEnd => (game with { GameEndCharacterRemark = ["他の者が覇を3回唱えました\n我らは及ばず・・\n敗北です"] }).MyApply(ShowCharacterRemark),
+          _ => game.MyPipe(UpdateGame.CalcArmyTarget)
+        };
+        
+      }
     }
   }
   private Grid CreatePersonPutPanel(GameState game,Post post,string backText,StackPanel personPutInnerPanel) {
@@ -547,7 +562,7 @@ public sealed partial class Game:Page {
         Button autoPutPersonButton = new Button { Width = UIUtil.personPutSize.Width * 3,VerticalAlignment = VerticalAlignment.Stretch,Background = Windows.UI.Color.FromArgb(100,100,100,100) }.MyApply(v => v.Content = new TextBlock { Text = Text.AutoPutPersonButtonText() });
         autoPutPersonButton.Click += (_,_) => GameData.game = AutoPutPersonButtonClick(GameData.game);
         return autoPutPersonButton;
-        GameState AutoPutPersonButtonClick(GameState game) => game.PlayCountry?.MyPipe(country => Code.Post.GetAutoPutPost(game,country,role)).MyPipe(postMap => UpdateGame.SetPersonPost(game,postMap)).MyApply(UpdateAreaPanels).MyApply(UpdateCountryPosts) ?? game;
+        GameState AutoPutPersonButtonClick(GameState game) => game.PlayCountry?.MyPipe(country => Code.Post.GetAutoPutPost(game,country,role)).MyPipe(postMap => UpdateGame.SetPersonPost(game,postMap)).MyApply(UpdateAreaPanels).MyApply(UpdateCountryPosts).MyApply(UpdateCountryInfoPanel) ?? game;
       }
       StackPanel CreatePersonHeadPostPanel(GameState game,ERole role) {
         return new StackPanel { Orientation = Orientation.Horizontal,BorderBrush = GetPostFrameColor(game,null).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth) }.MySetChildren([
@@ -563,8 +578,8 @@ public sealed partial class Game:Page {
     }
   }
   private static Color GetPostFrameColor(GameState game,EArea? area) => area != null && (game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.ChinaAreas ?? []).Contains(area.Value) ? new Color(150,100,100,30) : new Color(120,0,0,0);
-  private void RescaleTurnWinCondPanelUI(double scaleFactor) {
-    TurnWinCondPanel.RenderTransform = new ScaleTransform() { ScaleX = scaleFactor,ScaleY = scaleFactor,CenterX = TurnWinCondPanel.RenderSize.Width / 2 };
+  private void RescaleTurnFillDreamConditionPanelUI(double scaleFactor) {
+    TurnFillDreamConditionPanel.RenderTransform = new ScaleTransform() { ScaleX = scaleFactor,ScaleY = scaleFactor,CenterX = TurnFillDreamConditionPanel.RenderSize.Width / 2 };
   }
   private async void UpdateTurnLogUI(GameState game) {
     DateTime startTime = DateTime.Now;
@@ -589,21 +604,21 @@ public sealed partial class Game:Page {
     });
     void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) *GetZoomFactor();
   }
-  private async void UpdateTurnWinCondUI(GameState game) {
+  private async void UpdateTurnFillDreamConditionUI(GameState game) {
     DateTime startTime = DateTime.Now;
     TimeSpan startAnimationDelay = TimeSpan.FromSeconds(6);
     int transparentFrameCount = 60;
     double shadowWidth = 0.7;
-    Dictionary<string,bool?> winCondMap = game.PlayCountry?.MyPipe(v => game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.WinConditionMap.GetValueOrDefault(v))?.ProgressExplainFunc(game) ?? [];
+    Dictionary<string,bool?> fillDreamConditionMap = game.PlayCountry?.MyPipe(v => game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.FillDreamConditionMap.GetValueOrDefault(v))?.ProgressExplainFunc(game) ?? [];
     StackPanel panel = new StackPanel() { Background = Windows.UI.Color.FromArgb(187,255,255,255),IsHitTestVisible = false }.MySetChildren([
-      new TextBlock() { Text = Text.WinCondCaptionText(game) },
-      .. winCondMap.Select(winCond => new StackPanel(){ Orientation = Orientation.Horizontal }.MySetChildren([
-        new Grid(){ Width = BasicStyle.fontsize }.MySetChildren(winCond.Value is bool isClearCond? [..UIUtil.CreateWithShadow(() => CreateWinCondCheckText(isClearCond),shadowWidth,Colors.Black)]:[]),
-        new TextBlock() { Text = winCond.Key }
+      new TextBlock() { Text = Text.FillDreamConditionCaptionText(game) },
+      .. fillDreamConditionMap.Select(fillDreamCondition => new StackPanel(){ Orientation = Orientation.Horizontal }.MySetChildren([
+        new Grid(){ Width = BasicStyle.fontsize }.MySetChildren(fillDreamCondition.Value is bool isClearCond ? [..UIUtil.CreateWithShadow(() => CreateFillDreamConditionCheckText(isClearCond),shadowWidth,Colors.Black)]:[]),
+        new TextBlock() { Text = fillDreamCondition.Key }
       ]))
     ]);
-    TurnWinCondPanel.MySetChildren([panel]);
-    RescaleTurnWinCondPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * GetZoomFactor());
+    TurnFillDreamConditionPanel.MySetChildren([panel]);
+    RescaleTurnFillDreamConditionPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * GetZoomFactor());
     await Task.Run(async () => {
       await Task.Delay(startAnimationDelay);
       await Enumerable.Range(1,transparentFrameCount).MyAsyncForEachSequential(async v => {
@@ -612,9 +627,9 @@ public sealed partial class Game:Page {
         await Task.Delay(TimeSpan.FromSeconds(nextWaitSeconds));
         await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => panel.Opacity = 1 - (double)v / transparentFrameCount);
       });
-      await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => TurnWinCondPanel.Children.Remove(panel));
+      await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => TurnFillDreamConditionPanel.Children.Remove(panel));
     });
-    static TextBlock CreateWinCondCheckText(bool isClear) => new() { Text = isClear ? "✓" : "✗",Foreground = isClear ? Colors.Green : Colors.Red };
+    static TextBlock CreateFillDreamConditionCheckText(bool isClear) => new() { Text = isClear ? "✓" : "✗",Foreground = isClear ? Colors.Green : Colors.Red };
   }
   private void ShowMessage(string[] messages) {
     StackPanel panel = new StackPanel() {
@@ -702,8 +717,8 @@ public sealed partial class Game:Page {
           Make(Text.CountryTotalAffairParamText(game, pushCountry)),
           Make(Text.CountryInFundParamText(game, pushCountry)),
           Make(Text.CountryOutFundParamText(game, pushCountry)),
-          Make(Text.CountryWinCondCaptionText()),
-          .. (pushCountry?.MyPipe(country=>game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.WinConditionMap.GetValueOrDefault(country)?.Messages.MyPipe(v =>new List<string>([..v.Basic??[],..v.Extra??[]])))).MyPipe(v=>v is [] or null?[Text.NoBasicWinCondText()]:v.Prepend(Text.CountryWinCondHeadText())).Select(Make),
+          Make(Text.CountryFillDreamConditionCaptionText()),
+          .. (pushCountry?.MyPipe(country=>game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.FillDreamConditionMap.GetValueOrDefault(country)?.Messages.MyPipe(v =>new List<string>([..v.Basic??[],..v.Extra??[]])))).MyPipe(v=>v is [] or null?[Text.NoFillDreamConditionText()]:v.Prepend(Text.CountryFillDreamConditionHeadText())).Select(Make),
           Make(Text.CountryInitPersonCaptionText()),
           .. (pushCountry is null?[]:Enum.GetValues<ERole>().SelectMany(role=>Person.GetInitPersonMap(game,pushCountry.Value,role).Keys.OrderBy(v=>Person.GetPersonBirthYear(game,v)).Select(v=>Text.PersonInfoText(game,v)))).MyPipe(v=>v.MyIsEmpty()?[Text.CountryNoExistStartingPersonText()]:v).Select(Make),
         ];
@@ -718,7 +733,7 @@ public sealed partial class Game:Page {
         GameState SelectPlayCountry(GameState game,ECountry playCountry) => UpdateGame.AttachGameStartData(game,playCountry).MyApply( page.UpdateCountryPosts);
         GameState StartGame(GameState game) {
           UIUtil.SetVisibility(page.CountryPostsPanel,true);
-          return (game with { Phase = Phase.Planning }).MyPipe(UpdateGame.AppendGameStartLog).MyApply(page.UpdateAreaPanels).MyApply(GameLog.UpdateLogMessageUI).MyApply(page.UpdateTurnLogUI).MyApply(page.UpdateTurnWinCondUI).MyPipe(UpdateGame.CalcArmyTarget);
+          return (game with { Phase = Phase.Planning }).MyPipe(UpdateGame.AppendGameStartLog).MyApply(page.UpdateAreaPanels).MyApply(GameLog.UpdateLogMessageUI).MyApply(page.UpdateTurnLogUI).MyApply(page.UpdateTurnFillDreamConditionUI).MyPipe(UpdateGame.CalcArmyTarget);
         }
       }
       GameState SelectTarget(GameState game,EArea? area) => game.PlayCountry?.MyPipe(playCountry => game.Phase == Phase.Planning && !Country.IsSleep(game,playCountry) ? (game with { ArmyTargetMap = game.ArmyTargetMap.MyUpdate(playCountry,(_,_) => area) }).MyApply(page.UpdateCountryInfoPanel) : null) ?? game;

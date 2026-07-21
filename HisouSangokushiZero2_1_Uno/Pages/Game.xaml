@@ -14,6 +14,7 @@
       <RowDefinition/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <ScrollViewer x:Name="MapScroll" Grid.Row="0">
       <Grid x:Name="MapPanel">
@@ -23,9 +24,9 @@
       </Grid>
     </ScrollViewer>
     <StackPanel x:Name="TurnLogPanel" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="270"/>
-    <StackPanel x:Name="TurnWinCondPanel" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+    <StackPanel x:Name="TurnFillDreamConditionPanel" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
     <Canvas x:Name="CountryPostsPanel" Grid.Row="1" HorizontalAlignment="Stretch" Height="{x:Bind code:UIUtil.countryPersonPutPanelHeight}" Background="Transparent"/>
-    <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="2">
+    <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="3">
       <local:Ask x:Name="AskPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       <local:CharacterRemark x:Name="CharacterRemarkPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       <Canvas x:Name="MovePersonCanvas"/>
@@ -53,9 +54,10 @@
         <local:ExInfo x:Name="ExInfoPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       </Grid>
     </Grid>
-    <local:StateInfo x:Name="StateInfoPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-    <local:SaveAndLoad x:Name="SaveDataPanel" Grid.Row="0" Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
-    <Grid x:Name="LoadingImagePanel" Grid.Row="0" Grid.RowSpan="3" Background="#EEF">
+    <local:HegemonyPoint x:Name="HegemonyPointPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    <local:StateInfo x:Name="StateInfoPanel" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    <local:SaveAndLoad x:Name="SaveDataPanel" Grid.Row="0" Grid.RowSpan="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+    <Grid x:Name="LoadingImagePanel" Grid.Row="0" Grid.RowSpan="4" Background="#EEF">
       <TextBlock x:Name="LoadingText" Text="UI構築中.." HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
     </Grid>
   </Grid>

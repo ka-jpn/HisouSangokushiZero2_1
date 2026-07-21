@@ -45,16 +45,18 @@ internal sealed partial class CharacterRemark:UserControl {
     static Button CreateNextButton(CharacterRemark page,string[] remainContents) {
       return new Button { HorizontalAlignment = HorizontalAlignment.Stretch,VerticalAlignment = VerticalAlignment.Stretch,Background = Colors.FromARGB(34,0,0,0) }.MySetChild(new TextBlock { Text = remainContents.MyIsEmpty() ? "閉じる" : "次へ" }).MyApply(button =>
         button.Click += (_,_) => {
-          GameState newGameState = GameData.game.MyPipe(game => game.Phase == Phase.Planning ? game with { StartPlanningCharacterRemark = remainContents } : game.Phase == Phase.Execution ? game with { StartExecutionCharacterRemark = remainContents }: game);
+          GameState newGameState = GameData.game.MyPipe(game => game.Phase switch {
+            Phase.Planning => game with { StartPlanningCharacterRemark = remainContents },
+            Phase.Execution => game with { StartExecutionCharacterRemark = remainContents },
+            _ => game with { GameEndCharacterRemark = remainContents }
+          });
           GameData.game = newGameState;
           Show(page,newGameState);
         }
       );
     }
     static string[] GetCharacterRemark(GameState game) {
-      return game.Phase switch { Phase.Planning => Planning(game), Phase.Execution => Execution(game), _ => [] };
-      static string[] Planning(GameState game) => game.StartPlanningCharacterRemark ?? [];
-      static string[] Execution(GameState game) => game.StartExecutionCharacterRemark ?? [];
+      return game.Phase switch { Phase.Planning => game.StartPlanningCharacterRemark, Phase.Execution => game.StartExecutionCharacterRemark, _ => game.GameEndCharacterRemark };
     }
   }
   internal void ResizeElem(UIElement parent) {
