@@ -13,14 +13,11 @@ using static HisouSangokushiZero2_1_Uno.Code.DefType;
 using Image = HisouSangokushiZero2_1_Uno.Code.Image;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record PersonListData(Brush Brush,ECountry? Country,string Name,string Role,ImageSource RoleImage,int Rank,int BirthYear,string AppearYear,int DeathYear,string Biography);
-internal record CountryListData(Brush Brush,ECountry Country,decimal Fund,string AreasText);
-internal sealed partial class ParamList:UserControl {
+internal sealed partial class PersonList:UserControl {
   private enum SortButtonKind { 国役割別, ランク順, 生年順, 没年順 };
   private static UIElement? parent = null;
   internal const double itemsRepeaterWidth = 750;
-  internal const double personItemsRepeaterHeight = 400;
-  internal const double countryItemsRepeaterHeight = 300;
-  internal ParamList() {
+  internal PersonList() {
     InitializeComponent();
     MyInit();
     void MyInit() {
@@ -34,9 +31,8 @@ internal sealed partial class ParamList:UserControl {
       AttachEvent();
       SetUIElements();
       void AttachEvent() {
-        Scroll.SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
+        SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
         PersonScroll.SizeChanged += (_, _) => PersonItemsRepeater.Width = PersonScroll.RenderSize.Width;
-        CountryScroll.SizeChanged += (_, _) => CountryItemsRepeater.Width = CountryScroll.RenderSize.Width;
         void ResizeElem(UIElement parent) {
           double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
           double pageWidth = RenderSize.Width;
@@ -57,7 +53,6 @@ internal sealed partial class ParamList:UserControl {
         void LoadScenarioData(int scenarioNo) {
           ScenarioData? maybeScenario = GetScenarioData(scenarioNo);
           UpdatePersonItemsRepeater(maybeScenario, initSortKind);
-          updateCountryItemsRepeater(maybeScenario);
         }
         List<Button> CreateSortButtons() {
           return [.. buttonActionMap.Keys.Select(CreateSortButton)];
@@ -69,15 +64,8 @@ internal sealed partial class ParamList:UserControl {
             });
           }
         }
-        ScenarioData? GetScenarioData(int scenarioNo) {
-          return ScenarioBase.GetScenarioId(scenarioNo)?.MyPipe(ScenarioBase.GetScenarioData);
-        }
-        void UpdatePersonItemsRepeater(ScenarioData? maybeScenario, SortButtonKind buttonKind) {
-          maybeScenario?.MyApply(scenario => PersonItemsRepeater.ItemsSource = GetPersonListData(scenario, buttonKind));
-        }
-        void updateCountryItemsRepeater(ScenarioData? maybeScenario) {
-          maybeScenario?.MyApply(scenario => CountryItemsRepeater.ItemsSource = GetCountryListData(scenario));
-        }
+        ScenarioData? GetScenarioData(int scenarioNo) => ScenarioBase.GetScenarioId(scenarioNo)?.MyPipe(ScenarioBase.GetScenarioData);
+        void UpdatePersonItemsRepeater(ScenarioData? maybeScenario, SortButtonKind buttonKind) => maybeScenario?.MyApply(scenario => PersonItemsRepeater.ItemsSource = GetPersonListData(scenario, buttonKind));
       }
       void RefreshSortButtonPanelColor(StackPanel buttonPanel, SortButtonKind buttonKind) {
         buttonActionMap.Keys.MyGetIndex(v => v == buttonKind)?.MyApply(index => RefreshColor([.. buttonPanel.Children.OfType<Button>()], index));
@@ -87,12 +75,6 @@ internal sealed partial class ParamList:UserControl {
         return [.. buttonActionMap.GetValueOrDefault(buttonKind)?.Invoke(scenario.PersonMap.ToDictionary()).Select(ToPersonListItem) ?? []];
         PersonListData ToPersonListItem(KeyValuePair<PersonId, PersonData> personInfo) {
           return new PersonListData((scenario.CountryMap.GetValueOrDefault(personInfo.Value.Country)?.ViewColor ?? UIUtil.transparentColor).ToBrush(), personInfo.Value.Country, personInfo.Key.Value, Data.Language.Text.RoleToText(personInfo.Value.Role),Image.GetSvgImageSource($"{personInfo.Value.Role}",80,80),personInfo.Value.Rank, personInfo.Value.BirthYear, Person.GetAppearYear(personInfo.Value).MyPipe(appearYear => appearYear >= scenario.StartYear ? appearYear.ToString() : "登場"), personInfo.Value.DeathYear, Biography.biographyMap.GetValueOrDefault(personInfo.Key) ?? string.Empty);
-        }
-      }
-      List<CountryListData> GetCountryListData(ScenarioData scenario) {
-        return [.. scenario.CountryMap.OrderBy(v => v.Key).Select(ToCountryListItem)];
-        CountryListData ToCountryListItem(KeyValuePair<ECountry, CountryData> countryInfo) {
-          return new CountryListData((countryInfo.Value.ViewColor ?? UIUtil.transparentColor).ToBrush(), countryInfo.Key, countryInfo.Value.Fund, string.Join(",", scenario.AreaMap.Where(v => v.Value.Country == countryInfo.Key).Select(v => v.Key.ToString())));
         }
       }
     }

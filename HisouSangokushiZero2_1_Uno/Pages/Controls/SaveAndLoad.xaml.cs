@@ -14,7 +14,7 @@ using static HisouSangokushiZero2_1_Uno.Code.DefType;
 using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record SaveSlotData(int SlotIndex,SaveSlotMetaData? MetaData,string? SaveInfoText,Visibility DeleteButtonVisibility);
-internal record SaveSlotMetaData(string GameVersion,string? NowScenario,string? PlayCountry,string? PlayTurn,string TotalPlayTime,string LastSaveDate);
+internal record SaveSlotMetaData(string GameVersion,string? NowScenario,string? PlayCountry,string PlayCalendar,string PlayTurn,string TotalPlayTime,string LastSaveDate);
 public sealed partial class SaveAndLoad:UserControl {
   internal const double minScaleFactor = 0.65;
   internal const double scrollMaxWidth = UIUtil.fixModeMaxWidth * minScaleFactor;
@@ -42,10 +42,11 @@ public sealed partial class SaveAndLoad:UserControl {
         MetaData: new SaveSlotMetaData(
           GameVersion: $"ゲームバージョン：{meta.GameVersion}",
           NowScenario: $"シナリオ：{meta.NowScenario?.Value}",
-          PlayCountry: $"プレイ国名：{meta.PlayCountry?.ToString() ?? "(選択前)"}",
-          PlayTurn: $"暦：{meta.PlayTurn?.MyPipe(turn => Text.GetCalendarText(meta.NowScenario,turn)) ?? "(開始前)"}",
+          PlayCountry: $"陣営：{meta.PlayCountry?.ToString() ?? "(選択前)"}",
+          PlayCalendar: $"暦：{meta.PlayTurn?.MyPipe(turn => Text.GetCalendarText(meta.NowScenario,turn)) ?? "(開始前)"}",
+          PlayTurn: $"ターン：{meta.PlayTurn?.ToString() ?? "(開始前)"}",
           TotalPlayTime: $"プレイ時間：{Math.Floor(meta.TotalPlayTime.TotalMinutes)}分",
-          LastSaveDate: $"最終保存：{meta.LastSaveDate:yyyy/MM/dd HH:mm}"
+          LastSaveDate: $"保存：{meta.LastSaveDate:yyyy/MM/dd HH:mm}"
         ),
         SaveInfoText: null,
         DeleteButtonVisibility: Visibility.Visible
@@ -117,7 +118,7 @@ public sealed partial class SaveAndLoad:UserControl {
   }
   private async void SaveSlot_DeleteButtonClick(object sender,RoutedEventArgs e) {
     if (sender is Button button && button.DataContext is SaveSlotData slotData) {
-      CreateConfirmPanel(["セーブデータを削除しますか？"], async () => {
+      CreateConfirmPanel([$"スロット{IndexToFileNo(slotData.SlotIndex)}のセーブデータを削除しますか？"], async () => {
         await Storage.DeleteStorageData(IndexToFileNo(slotData.SlotIndex));
         await Task.Yield();
         await RefreshSaveSlotView();
@@ -135,6 +136,6 @@ public sealed partial class SaveAndLoad:UserControl {
       ])
     ]);
     GrayoutPanel.Visibility = Visibility.Visible;
-    static Button CreateButton() => new(){ Width = 100, Height = 40,Background = new Color(68,0,0,0).ToBrush() };
+    static Button CreateButton() => new(){ Width = 120, Height = 40,Background = new Color(68,0,0,0).ToBrush() };
   }
 }

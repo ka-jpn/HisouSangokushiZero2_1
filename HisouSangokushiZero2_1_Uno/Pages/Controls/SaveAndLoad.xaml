@@ -28,6 +28,8 @@
                     <StackPanel Width="10"/>
                     <TextBlock Text="{x:Bind MetaData.PlayCountry}"/>
                     <StackPanel Width="10"/>
+                    <TextBlock Text="{x:Bind MetaData.PlayCalendar}"/>
+                    <StackPanel Width="10"/>
                     <TextBlock Text="{x:Bind MetaData.PlayTurn}"/>
                   </StackPanel>
                   <StackPanel Orientation="Horizontal">
@@ -41,8 +43,8 @@
                 <TextBlock Text="{x:Bind SaveInfoText}" VerticalAlignment="Center"/>
               </Grid>
             </StackPanel>
-            <Button Grid.Column="1" Background="#FAA" VerticalAlignment="Stretch" Margin="2" Click="SaveSlot_DeleteButtonClick" Visibility="{x:Bind DeleteButtonVisibility}">
-              <TextBlock Margin="8" Text="削除"/>
+            <Button Grid.Column="1" Background="#FAA" VerticalAlignment="Stretch" Margin="2" Click="SaveSlot_DeleteButtonClick" Visibility="{x:Bind DeleteButtonVisibility}" Width="70">
+              <TextBlock Text="削除"/>
             </Button>
           </Grid>
         </DataTemplate>

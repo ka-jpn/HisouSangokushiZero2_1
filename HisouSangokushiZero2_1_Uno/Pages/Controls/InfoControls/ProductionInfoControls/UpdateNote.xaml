@@ -6,102 +6,101 @@
   <Grid Background="#EEE">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <Grid Grid.Row="0" Height="30">
       <TextBlock Text="更新履歴" FontSize="20" LineHeight="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-      <Button x:Name="CloseButton" Width="35" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#2F00">
-        <TextBlock Text="×" FontWeight="Bold" FontSize="25" LineHeight="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-      </Button>
     </Grid>
-    <Grid Grid.Row="1" Padding="5,0,5,5">
-      <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFF">
-        <StackPanel x:Name="ContentPanel" Padding="2">
-          <StackPanel HorizontalAlignment="Center">
-            <TextBlock Text="2023/09/28 公開"/>
-            <TextBlock Text="2024/07/01 ver1.0 機能拡張＆説明修正＆マップ更新"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・人物が1人以下の陣営に人物追加、ただし無理やり気味"/>
-              <TextBlock Text="・人物データに張超,曹寅陣営の欄がなかったので修正"/>
-              <TextBlock Text="・マップの見た目更新"/>
-              <TextBlock Text="・ゲーム中に毎ターンごとに勝利条件と達成具合が表示されるように"/>
-              <TextBlock Text="・役割にアイコンを割り当てた"/>
-              <TextBlock Text="・助力システムを実装、役割を変えることができるようになった"/>
-            </StackPanel>
-            <TextBlock Text="2025/06/08 ver1.1 開発言語変更による作り直しにより差し替え公開"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・見た目変更、人物の追加、人物の登場時期の変更、陣営勝利条件の微調整、挙動の調整"/>
-              <TextBlock Text="・陣営勝利条件の達成による勝利はCPUが先に達成した場合は敗北に"/>
-            </StackPanel>
-            <TextBlock Text="2025/06/09 ver1.2 スマホでプレイする際にレイアウトが崩れていたのに対処"/>
-            <TextBlock Text="2025/06/11 ver1.3 アップデートの際、人物駒が動かせなくなっていたのを修正"/>
-            <TextBlock Text="2025/06/14 ver1.4 レイアウト微修正"/>
-            <TextBlock Text="2025/06/15 ver1.5 投稿ページに繋がらない不具合に対処＆レイアウト微修正"/>
-            <TextBlock Text="2025/06/28 ver1.6 レイアウト微修正＆画面のちらつき抑制"/>
-            <TextBlock Text="2025/08/15 ver1.7 セーブ機能追加＆タイトルページ追加"/>
-            <TextBlock Text="2025/08/20 ver1.8 タイトルページ改善＆首都接続範囲判定がらみ調整"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・タイトルページが文字化けすることがあるので対処"/>
-              <TextBlock Text="・首都接続範囲判定を組み込み、遷都・人物配置変更・侵攻を接続範囲で制限"/>
-              <TextBlock Text="・行軍旗の表示経路を直線的から自領土を経由しながらに改善"/>
-            </StackPanel>
-            <TextBlock Text="2025/09/01 ver1.9 キャラによる導入説明追加＆旗表示の不具合修正"/>
-            <TextBlock Text="2025/09/23 ver1.10 不具合修正＆細かい改善"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・地域内政担当が地域陥落時に確定で死去していたのを25%に修正"/>
-              <TextBlock Text="・プレイヤーが国力回復の場合、他国領をクリックできないようにした"/>
-              <TextBlock Text="・侵攻中止・首都陥落・遷都・将官の戦死の際にキャラが言及するようにした"/>
-            </StackPanel>
-            <TextBlock Text="2025/09/26 ver1.11 人物リストのソートボタン導入"/>
-            <TextBlock Text="2025/10/06 ver1.12 拡大・縮小表示スライダー導入"/>
-            <TextBlock Text="2025/10/17 ver1.13 細かいUIの改善"/>
-            <TextBlock Text="2025/10/24 ver1.14 スマホでの動作安定化対応"/>
-            <TextBlock Text="2025/11/14 ver1.15 レイアウト変更＆NPC思考改善＆列伝導入開始"/>
-            <TextBlock Text="2025/11/17 ver1.16 セーブスロットを1個から10個に"/>
-            <TextBlock Text="2025/12/18 ver1.17 細かい改善＆セーブデータにログを含めた"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・再レイアウト時の内部的な動作の改善、軽量化"/>
-              <TextBlock Text="・南越を林邑に変更し、人物に区連と范熊を追加"/>
-              <TextBlock Text="・セーブデータのロード後にログが引き継がれなかったのを引き継ぐように"/>
-            </StackPanel>
-            <TextBlock Text="2025/12/25 ver1.18 いくつかの人物の追加・削除・変更＆列伝追記"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・素利、楼班、蘇僕延、蹋頓を追加"/>
-              <TextBlock Text="・麻奴、犀苦を削除"/>
-              <TextBlock Text="・護留のロールを中枢から防衛へ、芒中の生年変更"/>
-              <TextBlock Text="・列伝を部分的に追加した"/>
-            </StackPanel>
-            <TextBlock Text="2026/04/08 ver1.19 人物の追加・変更＆列伝追記"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・朱治を追加"/>
-              <TextBlock Text="・凌操のロールを防衛から攻撃へ"/>
-              <TextBlock Text="・反董連合シナリオの人物の列伝追加完了"/>
-            </StackPanel>
-            <TextBlock Text="2026/05/09 ver1.20 蜀之南征シナリオの人物列伝を部分的に追加"/>
-            <TextBlock Text="2026/06/12 ver1.21 セーブ周り改善＆NPC行動確定タイミング修正＆列伝追記"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・セーブデータ削除機能を追加"/>
-              <TextBlock Text="・セーブデータの削除や上書きに確認を挟むようにした"/>
-              <TextBlock Text="・NPCの行動確定がプレイヤーの後だったのをプレイヤーの前に"/>
-              <TextBlock Text="・乙巴素のランクを1から2に"/>
-              <TextBlock Text="・蜀之南征シナリオの人物列伝を部分的に追加した"/>
-              <TextBlock Text="・支出の民政費の計算式が間違っていたので修正"/>
-              <TextBlock Text="・ルール詳細のテキストを読みやすく改善"/>
-            </StackPanel>
-            <TextBlock Text="2026/07/08 ver1.22 キャラクターの発言機会を増やした＆列伝追記"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・キャラクターが自陣営の領土の増減や人物登用の際などにも発言するようにした"/>
-              <TextBlock Text="・蜀之南征シナリオの人物列伝を部分的に追加した"/>
-            </StackPanel>
-            <TextBlock Text="2026/07/21 ver1.23 勝利条件を制覇ポイント制に＆関連調整"/>
-            <StackPanel Padding="20,0,0,0">
-              <TextBlock Text="・勝利条件を制覇ポイント制にした、制覇率40%以上を3ターンで勝利に"/>
-              <TextBlock Text="・関連して勝利条件など説明テキストを修正"/>
-              <TextBlock Text="・蜀之南征シナリオ開始時の薊、代、南皮、魯、劇の内政値を下方修正"/>
-            </StackPanel>
+    <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFF" Margin="5,0">
+      <StackPanel x:Name="ContentPanel" Padding="2">
+        <StackPanel HorizontalAlignment="Center">
+          <TextBlock Text="2023/09/28 公開"/>
+          <TextBlock Text="2024/07/01 ver1.0 機能拡張＆説明修正＆マップ更新"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・人物が1人以下の陣営に人物追加、ただし無理やり気味"/>
+            <TextBlock Text="・人物データに張超,曹寅陣営の欄がなかったので修正"/>
+            <TextBlock Text="・マップの見た目更新"/>
+            <TextBlock Text="・ゲーム中に毎ターンごとに勝利条件と達成具合が表示されるように"/>
+            <TextBlock Text="・役割にアイコンを割り当てた"/>
+            <TextBlock Text="・助力システムを実装、役割を変えることができるようになった"/>
+          </StackPanel>
+          <TextBlock Text="2025/06/08 ver1.1 開発言語変更による作り直しにより差し替え公開"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・見た目変更、人物の追加、人物の登場時期の変更、陣営勝利条件の微調整、挙動の調整"/>
+            <TextBlock Text="・陣営勝利条件の達成による勝利はCPUが先に達成した場合は敗北に"/>
+          </StackPanel>
+          <TextBlock Text="2025/06/09 ver1.2 スマホでプレイする際にレイアウトが崩れていたのに対処"/>
+          <TextBlock Text="2025/06/11 ver1.3 アップデートの際、人物駒が動かせなくなっていたのを修正"/>
+          <TextBlock Text="2025/06/14 ver1.4 レイアウト微修正"/>
+          <TextBlock Text="2025/06/15 ver1.5 投稿ページに繋がらない不具合に対処＆レイアウト微修正"/>
+          <TextBlock Text="2025/06/28 ver1.6 レイアウト微修正＆画面のちらつき抑制"/>
+          <TextBlock Text="2025/08/15 ver1.7 セーブ機能追加＆タイトルページ追加"/>
+          <TextBlock Text="2025/08/20 ver1.8 タイトルページ改善＆首都接続範囲判定がらみ調整"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・タイトルページが文字化けすることがあるので対処"/>
+            <TextBlock Text="・首都接続範囲判定を組み込み、遷都・人物配置変更・侵攻を接続範囲で制限"/>
+            <TextBlock Text="・行軍旗の表示経路を直線的から自領土を経由しながらに改善"/>
+          </StackPanel>
+          <TextBlock Text="2025/09/01 ver1.9 キャラによる導入説明追加＆旗表示の不具合修正"/>
+          <TextBlock Text="2025/09/23 ver1.10 不具合修正＆細かい改善"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・地域内政担当が地域陥落時に確定で死去していたのを25%に修正"/>
+            <TextBlock Text="・プレイヤーが国力回復の場合、他国領をクリックできないようにした"/>
+            <TextBlock Text="・侵攻中止・首都陥落・遷都・将官の戦死の際にキャラが言及するようにした"/>
+          </StackPanel>
+          <TextBlock Text="2025/09/26 ver1.11 人物リストのソートボタン導入"/>
+          <TextBlock Text="2025/10/06 ver1.12 拡大・縮小表示スライダー導入"/>
+          <TextBlock Text="2025/10/17 ver1.13 細かいUIの改善"/>
+          <TextBlock Text="2025/10/24 ver1.14 スマホでの動作安定化対応"/>
+          <TextBlock Text="2025/11/14 ver1.15 レイアウト変更＆NPC思考改善＆列伝導入開始"/>
+          <TextBlock Text="2025/11/17 ver1.16 セーブスロットを1個から10個に"/>
+          <TextBlock Text="2025/12/18 ver1.17 細かい改善＆セーブデータにログを含めた"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・再レイアウト時の内部的な動作の改善、軽量化"/>
+            <TextBlock Text="・南越を林邑に変更し、人物に区連と范熊を追加"/>
+            <TextBlock Text="・セーブデータのロード後にログが引き継がれなかったのを引き継ぐように"/>
+          </StackPanel>
+          <TextBlock Text="2025/12/25 ver1.18 いくつかの人物の追加・削除・変更＆列伝追記"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・素利、楼班、蘇僕延、蹋頓を追加"/>
+            <TextBlock Text="・麻奴、犀苦を削除"/>
+            <TextBlock Text="・護留のロールを中枢から防衛へ、芒中の生年変更"/>
+            <TextBlock Text="・列伝を部分的に追加した"/>
+          </StackPanel>
+          <TextBlock Text="2026/04/08 ver1.19 人物の追加・変更＆列伝追記"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・朱治を追加"/>
+            <TextBlock Text="・凌操のロールを防衛から攻撃へ"/>
+            <TextBlock Text="・反董連合シナリオの人物の列伝追加完了"/>
+          </StackPanel>
+          <TextBlock Text="2026/05/09 ver1.20 蜀之南征シナリオの人物列伝を部分的に追加"/>
+          <TextBlock Text="2026/06/12 ver1.21 セーブ周り改善＆NPC行動確定タイミング修正＆列伝追記"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・セーブデータ削除機能を追加"/>
+            <TextBlock Text="・セーブデータの削除や上書きに確認を挟むようにした"/>
+            <TextBlock Text="・NPCの行動確定がプレイヤーの後だったのをプレイヤーの前に"/>
+            <TextBlock Text="・乙巴素のランクを1から2に"/>
+            <TextBlock Text="・蜀之南征シナリオの人物列伝を部分的に追加した"/>
+            <TextBlock Text="・支出の民政費の計算式が間違っていたので修正"/>
+            <TextBlock Text="・ルール詳細のテキストを読みやすく改善"/>
+          </StackPanel>
+          <TextBlock Text="2026/07/08 ver1.22 キャラクターの発言機会を増やした＆列伝追記"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・キャラクターが自陣営の領土の増減や人物登用の際などにも発言するようにした"/>
+            <TextBlock Text="・蜀之南征シナリオの人物列伝を部分的に追加した"/>
+          </StackPanel>
+          <TextBlock Text="2026/07/22 ver1.23 勝利条件を制覇ポイント制に＆関連調整"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・勝利条件を制覇ポイント制にした、制覇率40%以上を3ターンで勝利に"/>
+            <TextBlock Text="・関連して勝利条件など説明テキストを修正"/>
+            <TextBlock Text="・蜀之南征シナリオ開始時の薊、代、南皮、魯、劇の内政値を下方修正"/>
           </StackPanel>
         </StackPanel>
-      </ScrollViewer>
-    </Grid>
+      </StackPanel>
+    </ScrollViewer>
+    <Button Grid.Row="2" x:Name="CloseButton"  MaxWidth="350" Height="60" Margin="5" HorizontalAlignment="Stretch">
+      <TextBlock Text="閉じる" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Button>
   </Grid>
 </UserControl>

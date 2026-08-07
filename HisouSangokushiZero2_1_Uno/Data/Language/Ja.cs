@@ -80,7 +80,7 @@ internal class Ja:ILangText {
   }
   string ILangText.StartExecutionFailAttackCharacterRemarkText(EArea targetArea) => $"{targetArea}への侵攻は\n資金不足のため中止されました";
   string ILangText.GetRemarkPersonName(ECountry? country, bool isAliveCharacter) => isAliveCharacter ? country switch { ECountry.魏 => "杜畿", ECountry.呉 => "韓当", ECountry.蜀漢 => "簡雍", _ => "武官" } : "文官";
-  string ILangText.NoFillDreamConditionText() => "選べません(勝利条件なし)";
+  string ILangText.NoFillDreamConditionText() => "選べません(悲願なし、勝利可能陣営から除外)";
   string ILangText.AreaPostDefenseText() => "防";
   string ILangText.AreaPostAffairText() => "政";
   string ILangText.CountryFocusDefenseText() => "(防)";

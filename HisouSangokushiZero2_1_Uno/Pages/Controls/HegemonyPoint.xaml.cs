@@ -10,7 +10,7 @@ using static HisouSangokushiZero2_1_Uno.Code.DefType;
 using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class HegemonyPoint:UserControl {
-  private const double baseContentHeight = 25;
+  private const double baseContentHeight = 50;
   internal static Dictionary<ECountry,double> hegemonyPoints = [];
   internal static double? totalHegemonyPoint = null;
   private static Dictionary<ECountry,StackPanel> hegemonyPointPanels = [];
@@ -28,7 +28,7 @@ internal sealed partial class HegemonyPoint:UserControl {
   internal static void Show(HegemonyPoint page,GameState game,double scaleFactorX){
     hegemonyPoints = game.CountryMap.Where(v => v.Key != ECountry.漢).ToDictionary(v => v.Key,v => AddHegemonyPoint(game,v.Key)+calcAreaNumPoint(Country.GetAreaNum(game,v.Key))+calcAffairPoint(Country.GetTotalAffair(game,v.Key))).Where(v => v.Value > 0).OrderByDescending(v => v.Value).ToDictionary();
     totalHegemonyPoint = hegemonyPoints.Values.Sum();
-    hegemonyPointPanels = hegemonyPoints.ToDictionary(v => v.Key, v => new StackPanel{ Height = baseContentHeight, Background = Country.GetCountryColor(game,v.Key).ToBrush() }.MySetChildren([new TextBlock{ Text = Text.CountryText(v.Key) }]));
+    hegemonyPointPanels = hegemonyPoints.ToDictionary(v => v.Key, v => new StackPanel{ Height = baseContentHeight, Background = Country.GetCountryColor(game,v.Key).ToBrush() }.MySetChildren([new TextBlock{ Text = string.Join("\n", Text.CountryText(v.Key).ToArray()) }]));
     hegemonyPointPanels.ToList().ForEach(v => ToolTipService.SetToolTip(v.Value,$"{Text.CountryText(v.Key)}\n制覇ポイント{hegemonyPoints.GetValueOrDefault(v.Key):0.##}\n{HegemonyPointSectionToolTip(game,v.Key)}制覇率{hegemonyPoints.GetValueOrDefault(v.Key)/totalHegemonyPoint*100:0.##}%"));
     page.Content.MySetChildren([.. hegemonyPointPanels.Values]);
     CalcEachHegemonyPointPanelSizePos(page,scaleFactorX);

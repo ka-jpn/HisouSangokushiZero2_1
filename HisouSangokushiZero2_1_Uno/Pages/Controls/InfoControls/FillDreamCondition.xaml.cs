@@ -12,7 +12,6 @@ namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record FillDreamConditionData(Brush Brush,ECountry Country,string FillDreamConditionText);
 internal sealed partial class FillDreamCondition:UserControl {
   private const double itemsRepeaterWidth = 750;
-  private const double itemsRepeaterHeight = 350;
   private static UIElement? parent = null;
   internal FillDreamCondition() {
     InitializeComponent();
@@ -21,7 +20,8 @@ internal sealed partial class FillDreamCondition:UserControl {
       AttachEvent(page);
       SetUIElements();
       void AttachEvent(FillDreamCondition page) {
-        page.SizeChanged += (_,_) => parent?.MyApply(ResizeElem);
+        SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
+        FillDreamConditionScroll.SizeChanged += (_, _) => FillDreamConditionItemsRepeater.Width = FillDreamConditionScroll.RenderSize.Width;
         void ResizeElem(UIElement parent) {
           double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
           double contentWidth = RenderSize.Width / scaleFactor - 5;
@@ -31,15 +31,16 @@ internal sealed partial class FillDreamCondition:UserControl {
         }
       }
       void SetUIElements() {
-        List<TextBlock> fillDreamConditionScenarioNames = [FillDreamConditionScenarioName1,FillDreamConditionScenarioName2];
-        List<ItemsRepeater> fillDreamConditionItemsRepeaters = [FillDreamConditionItemsRepeater1, FillDreamConditionItemsRepeater2];
-        List<ScrollViewer> fillDreamConditionScrolls = [FillDreamConditionScroll1, FillDreamConditionScroll2];
-        fillDreamConditionScenarioNames.ForEachWithIndex((v,i) => v.Text = ScenarioBase.GetScenarioId(i)?.Value);
-        fillDreamConditionItemsRepeaters.ForEachWithIndex((v,i) => v.ItemsSource = ScenarioBase.GetScenarioId(i)?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(scenario => GetFillDreamConditionListData(scenario)));
-        fillDreamConditionScrolls.Zip(fillDreamConditionItemsRepeaters).ToList().ForEach(v => v.First.SizeChanged += (_, _) => {
-          v.Second.Width = v.First.RenderSize.Width;
-          v.First.UpdateLayout();
-        });
+        ScenarioBase.GetScenarioIds().Select(v => v.Value).ToList().ForEach(ScenarioComboBox.Items.Add);
+        LoadScenarioData(0);
+        ScenarioComboBox.SelectedIndex = 0;
+        ScenarioComboBox.SelectionChanged += (_, _) => LoadScenarioData(ScenarioComboBox.SelectedIndex);
+        void LoadScenarioData(int scenarioNo) {
+          ScenarioData? maybeScenario = GetScenarioData(scenarioNo);
+          UpdateFillDreamConditionItemsRepeater(maybeScenario);
+        }
+        ScenarioData? GetScenarioData(int scenarioNo) => ScenarioBase.GetScenarioId(scenarioNo)?.MyPipe(ScenarioBase.GetScenarioData);
+        void UpdateFillDreamConditionItemsRepeater(ScenarioData? maybeScenario) => maybeScenario?.MyApply(scenario => FillDreamConditionItemsRepeater.ItemsSource = GetFillDreamConditionListData(scenario));
         List<FillDreamConditionData> GetFillDreamConditionListData(ScenarioData scenario) {
           return [.. scenario.CountryMap.Select(ToCountryListItem)];
           FillDreamConditionData ToCountryListItem(KeyValuePair<ECountry,CountryData> countryInfo) {

@@ -18,32 +18,23 @@
       </Grid>
     </DataTemplate>
   </UserControl.Resources>
-  <ScrollViewer x:Name="Scroll" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-    <StackPanel x:Name="ContentPanel" Padding="2">
+  <Grid x:Name="ContentPanel" Padding="2">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0">
       <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-        <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="シナリオ１："/>
-        <TextBlock x:Name="FillDreamConditionScenarioName1" FontFamily="{StaticResource SourceHanSansJPBold}"/>
+        <TextBlock Text="表示シナリオ：" VerticalAlignment="Center"/>
+        <ComboBox Width="200" Height="40" x:Name="ScenarioComboBox"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" MaxWidth="{x:Bind local:FillDreamCondition.itemsRepeaterWidth}" Background="#EEE">
         <TextBlock Text="陣営" TextAlignment="Center" Width="50"/>
         <TextBlock Text="悲願" MaxWidth="700" Padding="5,0,0,0" />
       </StackPanel>
-      <ScrollViewer x:Name="FillDreamConditionScroll1" MaxWidth="{x:Bind local:FillDreamCondition.itemsRepeaterWidth}" Height="{x:Bind local:FillDreamCondition.itemsRepeaterHeight}">
-        <ItemsRepeater x:Name="FillDreamConditionItemsRepeater1" ItemTemplate="{StaticResource FillDreamConditionItemsRepeater}" Background="#CCC"/>
-      </ScrollViewer>
-      <StackPanel Height="2"></StackPanel>
-      <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-        <TextBlock FontFamily="{StaticResource SourceHanSansJPBold}" Text="シナリオ２："/>
-        <TextBlock x:Name="FillDreamConditionScenarioName2" FontFamily="{StaticResource SourceHanSansJPBold}"/>
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" MaxWidth="{x:Bind local:FillDreamCondition.itemsRepeaterWidth}" Background="#EEE">
-        <TextBlock Text="陣営名" TextAlignment="Center" Width="50"/>
-        <TextBlock Text="悲願" MaxWidth="700" Padding="5,0,0,0" />
-      </StackPanel>
-      <ScrollViewer x:Name="FillDreamConditionScroll2" MaxWidth="{x:Bind local:FillDreamCondition.itemsRepeaterWidth}" Height="{x:Bind local:FillDreamCondition.itemsRepeaterHeight}">
-        <ItemsRepeater x:Name="FillDreamConditionItemsRepeater2" ItemTemplate="{StaticResource FillDreamConditionItemsRepeater}" Background="#CCC"/>
-      </ScrollViewer>
-      <StackPanel Height="2"></StackPanel>
     </StackPanel>
-  </ScrollViewer>
+    <ScrollViewer Grid.Row="1" x:Name="FillDreamConditionScroll" MaxWidth="{x:Bind local:FillDreamCondition.itemsRepeaterWidth}">
+      <ItemsRepeater x:Name="FillDreamConditionItemsRepeater" ItemTemplate="{StaticResource FillDreamConditionItemsRepeater}" Background="#CCC"/>
+    </ScrollViewer>
+  </Grid>
 </UserControl>

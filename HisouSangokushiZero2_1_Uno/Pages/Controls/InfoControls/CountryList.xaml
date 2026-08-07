@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" ?>
+<UserControl 
+  x:Class="HisouSangokushiZero2_1_Uno.Pages.CountryList"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:HisouSangokushiZero2_1_Uno.Pages">
+  <UserControl.Resources>
+    <DataTemplate x:Key="CountryItemsRepeater" x:DataType="local:CountryListData">
+      <Grid Background="{x:Bind Brush}" HorizontalAlignment="Stretch" MinHeight="25" Padding="0,0,0,1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="50"/>
+          <ColumnDefinition Width="65"/>
+          <ColumnDefinition Width="65"/>
+          <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="{x:Bind Country}" TextAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1" Text="{x:Bind Fund}" TextAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="2" Text="{x:Bind SleepTurnNum}" TextAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="3" Text="{x:Bind AreasText}" Margin="1" TextAlignment="Start" VerticalAlignment="Center"/>
+      </Grid>
+    </DataTemplate>
+  </UserControl.Resources>
+  <Grid x:Name="ContentPanel" Padding="2">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0">
+      <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+        <TextBlock Text="表示シナリオ：" VerticalAlignment="Center"/>
+        <ComboBox Width="200" Height="40" x:Name="ScenarioComboBox"/>
+      </StackPanel>
+      <StackPanel MaxWidth="{x:Bind local:CountryList.itemsRepeaterWidth}" Orientation="Horizontal" Background="#EEE">
+        <TextBlock Text="陣営" Width="50" TextAlignment="Center"/>
+        <TextBlock Text="初期資金" Width="65" TextAlignment="Center"/>
+        <TextBlock Text="初期休み" Width="65" TextAlignment="Center"/>
+        <TextBlock Text="初期領土" Width="570" TextAlignment="Start"/>
+      </StackPanel>
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" x:Name="CountryScroll" MaxWidth="{x:Bind local:CountryList.itemsRepeaterWidth}">
+      <ItemsRepeater x:Name="CountryItemsRepeater" ItemTemplate="{StaticResource CountryItemsRepeater}" Background="#CCC"/>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

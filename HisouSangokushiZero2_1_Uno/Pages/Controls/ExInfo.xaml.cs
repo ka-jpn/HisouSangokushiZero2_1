@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class ExInfo:UserControl {
-  private enum ExInfoState { Explain, FillDream, ParamList, ProductionInfo, Setting };
+  private enum ExInfoState { Explain, FillDream, PersonList, CountryList, ProductionInfo, Setting };
   private static readonly Dictionary<ExInfoState,UserControl> exInfoStateMap = [];
   internal ExInfo() {
     InitializeComponent();
@@ -13,7 +13,8 @@ internal sealed partial class ExInfo:UserControl {
     void MyInit() {
       Explain.Init(InfoContentPanel);
       FillDreamCondition.Init(InfoContentPanel);
-      ParamList.Init(InfoContentPanel);
+      PersonList.Init(InfoContentPanel);
+      CountryList.Init(InfoContentPanel);
       ProductionInfo.Init(InfoContentPanel);
       Setting.Init(InfoContentPanel);
       AttachEvent();
@@ -21,7 +22,8 @@ internal sealed partial class ExInfo:UserControl {
       void AttachEvent() {
         ExplainButton.Click += (_,_) => SwitchInfoButton(ExInfoState.Explain);
         FillDreamConditionButton.Click += (_,_) => SwitchInfoButton(ExInfoState.FillDream);
-        ParamListButton.Click += (_,_) => SwitchInfoButton(ExInfoState.ParamList);
+        PersonListButton.Click += (_,_) => SwitchInfoButton(ExInfoState.PersonList);
+        CountryListButton.Click += (_,_) => SwitchInfoButton(ExInfoState.CountryList);
         ProductionInfoButton.Click += (_,_) => SwitchInfoButton(ExInfoState.ProductionInfo);
         SettingButton.Click += (_,_) => SwitchInfoButton(ExInfoState.Setting);
       }
@@ -33,7 +35,8 @@ internal sealed partial class ExInfo:UserControl {
           Dictionary<ExInfoState, Button> buttonMap = new([
             new(ExInfoState.Explain,ExplainButton),
             new(ExInfoState.FillDream,FillDreamConditionButton),
-            new(ExInfoState.ParamList,ParamListButton),
+            new(ExInfoState.PersonList,PersonListButton),
+            new(ExInfoState.CountryList,CountryListButton),
             new(ExInfoState.ProductionInfo,ProductionInfoButton),
             new(ExInfoState.Setting,SettingButton)
           ]);
@@ -50,7 +53,8 @@ internal sealed partial class ExInfo:UserControl {
           static UserControl CreateInfoPanel(ExInfoState state) => state switch {
             ExInfoState.Explain => new Explain(),
             ExInfoState.FillDream => new FillDreamCondition(),
-            ExInfoState.ParamList => new ParamList(),
+            ExInfoState.PersonList => new PersonList(),
+            ExInfoState.CountryList => new CountryList(),
             ExInfoState.ProductionInfo => new ProductionInfo(),
             ExInfoState.Setting => new Setting()
           };
