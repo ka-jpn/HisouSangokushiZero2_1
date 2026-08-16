@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using Uno.UI;
 namespace HisouSangokushiZero2_1_Uno;
 public partial class App:Application {
   /// <summary>
@@ -12,13 +11,13 @@ public partial class App:Application {
   /// </summary>
   public App() {
     InitializeComponent();
-    FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///Assets/Fonts/SourceHanSansJP-Medium.woff2";//add code:set defaultFont
+    Uno.UI.FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///Assets/Fonts/SourceHanSansJP-Medium.woff2";//add code:set defaultFont
   }
   protected Window? MainWindow { get; private set; }
   protected override async void OnLaunched(LaunchActivatedEventArgs args) {
     MainWindow = new Window();
 #if DEBUG
-    MainWindow.UseStudio();
+    // MainWindow.UseStudio();
 #endif
     // Do not repeat app initialization when the Window already has content,
     // just ensure that the window is active
@@ -92,10 +91,10 @@ public partial class App:Application {
       // builder.AddFilter("Microsoft.UI.Xaml.Data", LogLevel.Debug );
 
       // Binder memory references tracking
-      // builder.AddFilter("Uno.UI.DataBinding.BinderReferenceHolder", LogLevel.Debug );
+      // builder.AddFilter("Uno.WinUI.DataBinding.BinderReferenceHolder", LogLevel.Debug );
 
       // DevServer and HotReload related
-      // builder.AddFilter("Uno.UI.RemoteControl", LogLevel.Information);
+      // builder.AddFilter("Uno.WinUI.RemoteControl", LogLevel.Information);
 
       // Debug JS interop
       // builder.AddFilter("Uno.Foundation.WebAssemblyRuntime", LogLevel.Debug );

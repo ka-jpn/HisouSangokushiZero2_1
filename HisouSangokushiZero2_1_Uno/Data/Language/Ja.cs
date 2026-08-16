@@ -118,6 +118,8 @@ internal class Ja:ILangText {
   string ILangText.PersonInfoText(GameState game, PersonId personId) => $"{personId.Value}  {RoleToText(Person.GetPersonRole(game, personId))} ランク{Person.GetPersonRank(game, personId)} 齢{Turn.GetYear(game) - Person.GetPersonBirthYear(game, personId)}";
   string ILangText.LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => $"{CountryText(attackSide)}に{targetArea}を奪われました";
   string ILangText.GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => $"{CountryText(defenseSide)}領の{targetArea}が我々の傘下に入りました";
+  string ILangText.NotLostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => $"{CountryText(attackSide)}に{targetArea}を攻撃されましたが守り切りました";
+  string ILangText.NotGetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => $"{CountryText(defenseSide)}領の{targetArea}を攻撃しましたが奪えませんでした";
   string? ILangText.PerishSideCharacterRemarkText(ECountry country) => country is not ECountry.漢 ? $"{CountryText(country)}陣営を滅亡させました" : null;
   string? ILangText.AppearPersonCharacterRemarkText(List<PersonId> appearPersons) =>　appearPersons.Count != 0 ? $"{string.Join("と", appearPersons.Select(v => v.Value))}を登用しました" : null;
   string? ILangText.NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons) => naturalDeathPersons.Count != 0 ? $"{string.Join("と", naturalDeathPersons.Select(v => v.Value))}が死去しました" : null;
@@ -125,9 +127,14 @@ internal class Ja:ILangText {
   string ILangText.FillDreamRemarkText() => $"我々は悲願を達成しました";
   string? ILangText.LostDreamAnotherCountrysRemarkText(List<ECountry> sides) => sides.Count != 0 ? $"{string.Join("と",sides.MyNullable().Select(CountryText))}の悲願は未達成状態になりました" : null;
   string ILangText.LostDreamRemarkText() => $"我々の悲願は未達成状態になりました";
-  string? ILangText.HegemonyAnotherCountrysRemarkText(int hegemonyTurn,List<ECountry> hegemony1TurnSides) =>hegemony1TurnSides.Count != 0 ?  $"{string.Join("と",hegemony1TurnSides)}は{hegemonyTurn}回目の覇を宣言しました！\n{hegemonyTurn switch {
+  string? ILangText.HegemonyAnotherCountrysRemarkText(int hegemonyTurn,List<ECountry> hegemony1TurnSides) =>hegemony1TurnSides.Count != 0 ? $"{string.Join("と",hegemony1TurnSides)}は{hegemonyTurn}回目の覇を宣言しました！\n{hegemonyTurn switch {
       1 => "3回宣言した陣営が勝利になります",
       2 => "あと1回先に宣言されると我らは敗北になります",
       _=> null}}":null;
   string? ILangText.HegemonyRemarkText(int hegemonyTurn) => hegemonyTurn != 0 ? $"我々は唱覇条件を満たしています！\n{hegemonyTurn}回目の覇を宣言しました！\n3回宣言で勝利！" : null;
+  string ILangText.EndPlanningPhaseAskText(GameState game) => $"{(game.PlayCountry?.MyPipe(game.ArmyTargetMap.GetValueOrDefault),Country.IsSleep(game,game.PlayCountry)) switch {
+      (EArea area,_) => $"{CountryText(area.MyPipe(game.AreaMap.GetValueOrDefault)?.Country)}領の{area}に侵攻が指定されています\n{game.PlayCountry?.MyPipe(v=>Country.CalcAttackFund(game,v))}の資金が必要です{(game.PlayCountry?.MyPipe(v=>Country.CanPayAttackFund(game,v)) ?? false ? null : "が不足しています\n防衛専念に変更されます")}",
+      (null,false) => "防衛専念が指定されています",
+      (null,true) => "我らは国力回復中です"
+    }}\n軍議を終了しますか？";
 }

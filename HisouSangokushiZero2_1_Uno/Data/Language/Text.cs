@@ -89,6 +89,8 @@ internal static class Text {
   internal static string PersonInfoText(GameState game, PersonId personId) => GameData.langText.PersonInfoText(game, personId);
   internal static string LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => GameData.langText.LostAreaCharacterRemarkText(attackSide, targetArea);
   internal static string GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => GameData.langText.GetAreaCharacterRemarkText(defenseSide, targetArea);
+  internal static string NotLostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea) => GameData.langText.NotLostAreaCharacterRemarkText(attackSide, targetArea);
+  internal static string NotGetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea) => GameData.langText.NotGetAreaCharacterRemarkText(defenseSide, targetArea);
   internal static string? PerishSideCharacterRemarkText(ECountry country) => GameData.langText.PerishSideCharacterRemarkText(country);
   internal static string? AppearPersonCharacterRemarkText(List<PersonId> appearPersons) => GameData.langText.AppearPersonCharacterRemarkText(appearPersons);
   internal static string? NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons) => GameData.langText.NaturalDeathPersonRemarkText(naturalDeathPersons);
@@ -98,6 +100,7 @@ internal static class Text {
   internal static string LostDreamRemarkText() => GameData.langText.LostDreamRemarkText();
   internal static string? HegemonyAnotherCountrysRemarkText(int hegemonyTurnNum,List<ECountry> sides) => GameData.langText.HegemonyAnotherCountrysRemarkText(hegemonyTurnNum,sides);
   internal static string? HegemonyRemarkText(int hegemonyTurn) => GameData.langText.HegemonyRemarkText(hegemonyTurn);
+  internal static string EndPlanningPhaseAskText(GameState game) => GameData.langText.EndPlanningPhaseAskText(game);
   internal interface ILangText {
     internal string ProgressSaveText();
     internal string CompleteSaveText();
@@ -180,6 +183,8 @@ internal static class Text {
     internal string PersonInfoText(GameState game, PersonId personId);
     internal string LostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea);
     internal string GetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea);
+    internal string NotLostAreaCharacterRemarkText(ECountry attackSide, EArea targetArea);
+    internal string NotGetAreaCharacterRemarkText(ECountry? defenseSide, EArea targetArea);
     internal string? PerishSideCharacterRemarkText(ECountry country);
     internal string? AppearPersonCharacterRemarkText(List<PersonId> appearPersons);
     internal string? NaturalDeathPersonRemarkText(List<PersonId> naturalDeathPersons);
@@ -189,5 +194,6 @@ internal static class Text {
     internal string LostDreamRemarkText();
     internal string? HegemonyAnotherCountrysRemarkText(int hegemonyTurnNum,List<ECountry> sides);
     internal string? HegemonyRemarkText(int hegemonyTurn);
+    internal string EndPlanningPhaseAskText(GameState game);
   }
 }

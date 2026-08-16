@@ -28,7 +28,7 @@
     <Canvas x:Name="CountryPostsPanel" Grid.Row="1" HorizontalAlignment="Stretch" Height="{x:Bind code:UIUtil.countryPersonPutPanelHeight}" Background="Transparent"/>
     <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="3">
       <local:Ask x:Name="AskPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
-      <local:CharacterRemark x:Name="CharacterRemarkPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
+      <local:Character x:Name="CharacterRemarkPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       <Canvas x:Name="MovePersonCanvas"/>
     </Grid>
     <Grid x:Name="InfoFramePanel" Grid.Row="0">

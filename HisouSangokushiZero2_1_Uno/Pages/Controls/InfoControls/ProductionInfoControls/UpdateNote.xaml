@@ -96,6 +96,13 @@
             <TextBlock Text="・関連して勝利条件など説明テキストを修正"/>
             <TextBlock Text="・蜀之南征シナリオ開始時の薊、代、南皮、魯、劇の内政値を下方修正"/>
           </StackPanel>
+          <TextBlock Text="2026/08/10 ver1.24 微修正＆全列伝記入完了"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・軍議フェイズを完了する際に侵攻先指令と費用を確認して進めるようにした"/>
+            <TextBlock Text="・首都が攻撃された際の防衛が中央軍の後に首都のエリア防衛担当だったのを逆に"/>
+            <TextBlock Text="・スマホで首都ポストのパネルの重なり順の更新が正しくないことがあるのを修正"/>
+            <TextBlock Text="・蜀之南征シナリオの人物列伝を記入完了し、全列伝記入完了"/>
+          </StackPanel>
         </StackPanel>
       </StackPanel>
     </ScrollViewer>

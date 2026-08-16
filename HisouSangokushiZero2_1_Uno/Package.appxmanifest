@@ -5,7 +5,7 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity  Name="HisouSangokushiZero2-1" Version="1.20.0.0" Publisher="CN=かりんとう"/>
+  <Identity  Name="HisouSangokushiZero2-1" Version="1.24.0.0" Publisher="CN=かりんとう"/>
   <Properties >
   
   <DisplayName>悲愴三国志Zero2-1</DisplayName>

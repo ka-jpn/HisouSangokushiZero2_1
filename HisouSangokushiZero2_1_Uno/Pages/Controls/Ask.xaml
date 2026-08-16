@@ -18,10 +18,10 @@
         <ColumnDefinition x:Name="ButtonMargin"/>
         <ColumnDefinition/>
       </Grid.ColumnDefinitions>
-      <Button x:Name="OkButton" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FEEE">
+      <Button x:Name="OkButton" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#2000">
         <TextBlock x:Name="OkButtonText"/>
       </Button>
-      <Button x:Name="CloseButton" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FEEE">
+      <Button x:Name="CloseButton" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#2000">
         <TextBlock x:Name="CloseButtonText" Text="閉じる"/>
       </Button>
     </Grid>

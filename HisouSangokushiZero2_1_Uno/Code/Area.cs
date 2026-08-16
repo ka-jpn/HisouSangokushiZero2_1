@@ -22,7 +22,7 @@ internal static class Area {
   private static EArea[] GetMoreOneDistanceAreas(GameState game,ECountry country,List<EArea[]> map) => [.. map.Last().SelectMany(v => GetAdjacentTargetCountryAreas(game,country,v)).Distinct().Except(map.SelectMany(v => v))];
   internal static List<EArea> CalcOrdDefenseAreas(GameState game,ECountry country) {
     return [.. GetConnectCapitalCountryAreas(game,country).OrderByDescending(v => ComputeAreaPressure(game,v))];
-    static decimal ComputeAreaPressure(GameState game,EArea area) => ComputeAdjacentAnotherCountryAreas(game,area).Select(adjacent => AdjacentAreaPersonRank(game,adjacent) + 1).Sum();
+    static decimal ComputeAreaPressure(GameState game,EArea area) => ComputeAdjacentAnotherCountryAreas(game,area).Sum(adjacent => AdjacentAreaPersonRank(game,adjacent) + 1);
     static decimal AdjacentAreaPersonRank(GameState game,EArea adjacent) => Country.GetAreaCountry(game,adjacent)?.MyPipe(v => Person.GetPostPerson(game,v,new(ERole.Defense,new(adjacent))))?.MyPipe(v => Person.CalcRoleRank(game,v.Key,ERole.Defense)) ?? 0m;
     static List<EArea> ComputeAdjacentAnotherCountryAreas(GameState game,EArea area) => game.AreaMap.GetValueOrDefault(area)?.Country?.MyPipe(country => GetAdjacentAnotherCountryAreas(game,country,area)) ?? [];
   }

@@ -8,17 +8,17 @@ using System.Collections.Generic;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class StateInfo:UserControl {
-  private Func<GameState, GameState> nextButtonAction = MyUtil.MyUtil.Identity<GameState>();
+  private Func<Task<GameState>> nextButtonAction = () => throw new Exception();
   internal const double baseContentHeight = 45;
   internal StateInfo() {
     InitializeComponent();
     MyInit(this);
     static void MyInit(StateInfo page) {
       page.Content.Height = baseContentHeight;
-      page.NextButton.Click += (_,_) => GameData.game = page.nextButtonAction(GameData.game);
+      page.NextButton.Click += async (_,_) => GameData.game = await page.nextButtonAction();
     }
   }
-  internal static void Show(StateInfo page,List<UIElement> InfoContents,string? buttonText,Func<GameState, GameState> buttonAction) {
+  internal static void Show(StateInfo page,List<UIElement> InfoContents,string? buttonText,Func<Task<GameState>> buttonAction) {
     page.InfoContentsPanel.MySetChildren([.. InfoContents]);
     if(buttonText is {}) {
       page.NextButtonText.Text = buttonText;

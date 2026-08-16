@@ -47,7 +47,7 @@ public sealed partial class Game:Page {
       UIUtil.SwitchViewModeActions.Add(RefreshViewMode);
       UIUtil.ChangeScaleActions.Add(ResizeMap);
       Ask.Init(MainGrid);
-      CharacterRemark.Init(MainGrid);
+      Character.Init(MainGrid);
       UIUtil.SaveGameActions.Add(async () => {
         await Task.Run(async () => {
           await Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () => await SaveAndLoad.Show(SaveDataPanel, true, async _ => {
@@ -258,14 +258,14 @@ public sealed partial class Game:Page {
       Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => ShowEndGameInfo(game)
     };
     string? buttonText = Text.EndPhaseButtonText(game.Phase);
-    StateInfo.Show(StateInfoPanel,contents,buttonText,ButtonAction);
-    GameState ButtonAction(GameState game) {
+    StateInfo.Show(StateInfoPanel,contents,buttonText,async () => await ButtonAction(game));
+    async Task<GameState> ButtonAction(GameState game) {
       animationTaskTokens.Clear();
       return game.Phase switch {
         Phase.Starting => throw new Exception(),
-        Phase.Planning => game.MyPipe(EndPlanningPhase).MyApply(UpdateCountryInfoPanel),
+        Phase.Planning => await Character.ShowAsk(CharacterRemarkPanel,game,Text.EndPlanningPhaseAskText(game),isYes => isYes ? game.MyPipe(EndPlanningPhase).MyApply(UpdateCountryInfoPanel) : game),
         Phase.Execution => game.MyPipe(EndExecutionPhase).MyApply(UpdateCountryInfoPanel),
-        Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => game.MyApply(ShowCharacterRemark).MyApply(ShowGameEndLogButtonClick)
+        Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => game.MyApply(ShowGameEndLogButtonClick)
       };
     }
     List<UIElement> ShowSelectScenario(GameState game) => [
@@ -687,16 +687,13 @@ public sealed partial class Game:Page {
         _ => []
       });
       if(resetZIndexPanels.Count != 0) {
-        resetZIndexPanels.ToList().ForEach(v => {
-          CountryPostsPanel.Children.Remove(v);
-          CountryPostsPanel.Children.Add(v);
-        });
+        CountryPostsPanel.MySetChildren([..CountryPostsPanel.Children.Except(resetZIndexPanels), ..resetZIndexPanels]);
         activePanelRole = toActiveRole;       
       }
     }
     static List<Grid> GetResetZIndexPanels(ERole[] resetZIndexRoles) => resetZIndexRoles.Select(countryPostPanelMap.GetValueOrDefault).MyNonNull();
   }
-  private void ShowCharacterRemark(GameState game) => CharacterRemark.Show(CharacterRemarkPanel,game);
+  private void ShowCharacterRemark(GameState game) => Character.ShowRemark(CharacterRemarkPanel,game);
   private static class PushArea {
     private static EArea? pushArea = null;
     internal static void Push(EArea area) => pushArea = area;
