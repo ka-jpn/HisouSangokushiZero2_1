@@ -30,7 +30,7 @@ internal sealed partial class Explain:UserControl {
       void AttachEvent(Explain page) {
         page.SizeChanged += (_,_) => parent?.MyApply(ResizeElem);
         void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
           double contentWidth = RenderSize.Width / scaleFactor - 5;
           Size judgeViewSize = new(Math.Min(AttackJudgeExplainPanel.MaxWidth,contentWidth - BattleExplainCaption.DesiredSize.Width),AttackJudgeExplainPanel.Height);
           ContentPanel.Width = contentWidth;

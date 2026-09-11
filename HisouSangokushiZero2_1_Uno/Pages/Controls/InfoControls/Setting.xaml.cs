@@ -27,7 +27,7 @@ internal sealed partial class Setting:UserControl {
         InitGameButton.Click += (_,_) => UIUtil.InitGame();
         BackTitleButton.Click += (_,_) => (Window.Current?.Content as Frame)?.Navigate(typeof(Title));
         void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
           double contentWidth = RenderSize.Width / scaleFactor - 5;
           ContentPanel.Width = contentWidth;
           ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor,ScaleY = scaleFactor };
@@ -41,15 +41,15 @@ internal sealed partial class Setting:UserControl {
           ZoomOutButton.MaxWidth = (contentWidth - MapZoomCaption.Width - 10) / 2;
         }
         void ChangeZoomLevel(double zoomLevelDiff) {
-          Game.zoomLevel = Math.Clamp(Game.zoomLevel + zoomLevelDiff,minZoomLevel,maxZoomLevel); RefreshZoomButtonEnable(); UIUtil.ChangeScaleActions.ForEach(v => v());
+          UIUtil.zoomLevel = Math.Clamp(UIUtil.zoomLevel + zoomLevelDiff,minZoomLevel,maxZoomLevel); RefreshZoomButtonEnable(); UIUtil.ChangeScaleActions.ForEach(v => v());
         }
       }
       void RefreshUIElements() {
         ViewModeText.Text = UIUtil.viewMode == UIUtil.ViewMode.fix ? "固定幅" : "フィット";
       }
       void RefreshZoomButtonEnable() {
-        ZoomInButton.IsEnabled = Game.zoomLevel < maxZoomLevel;
-        ZoomOutButton.IsEnabled = Game.zoomLevel > minZoomLevel;
+        ZoomInButton.IsEnabled = UIUtil.zoomLevel < maxZoomLevel;
+        ZoomOutButton.IsEnabled = UIUtil.zoomLevel > minZoomLevel;
       }
     }
   }

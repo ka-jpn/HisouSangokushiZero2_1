@@ -20,7 +20,7 @@ internal sealed partial class Ask:UserControl {
     void MyInit() {
       OkButton.Click += (_,_) => ExeOkButtonAction();
       CloseButton.Click += (_,_) => UIUtil.SetVisibility(this,false);
-      Page.SizeChanged += (_,_) => parent?.MyApply(parent => ResizeElem(parent));
+      SizeChanged += (_,_) => parent?.MyApply(parent => ResizeElem(parent));
       static void ExeOkButtonAction() => OkButtonAction();
     }
   }
@@ -35,14 +35,14 @@ internal sealed partial class Ask:UserControl {
     parent?.MyApply(page.ResizeElem);
   }
   internal void ResizeElem(UIElement parent) {
-    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
     double sideMargin = UIUtil.infoFrameWidth * scaleFactor;
-    double contentWidth = Page.RenderSize.Width - sideMargin * 2 - padding * 2;
+    double contentWidth = RenderSize.Width - sideMargin * 2 - padding * 2;
     Content.Margin = new(sideMargin,sideMargin,sideMargin,0);
     TitleTextBlock.Margin = new(0,padding * scaleFactor,0,BasicStyle.textHeight * titleTextScaleFactor * (scaleFactor - 1));
     TitleTextBlock.RenderTransform = new ScaleTransform { ScaleX = scaleFactor * titleTextScaleFactor,ScaleY = scaleFactor * titleTextScaleFactor,CenterX = UIUtil.CalcTextWidthForFullWidth(TitleTextBlock.Text) * BasicStyle.fontsize * titleTextScaleFactor / 2 };
     DetailView.Width = Math.Min(contentWidth,(maxWidth + padding * 2 / scaleFactor) * scaleFactor);
-    DetailView.Height = Math.Min(Page.RenderSize.Height * 0.6,Page.RenderSize.Height - (UIUtil.infoFrameWidth * 2 + TitleTextBlock.RenderSize.Height + OkButton.RenderSize.Height + padding * 2) * scaleFactor - padding * 4);
+    DetailView.Height = Math.Min(RenderSize.Height * 0.6,RenderSize.Height - (UIUtil.infoFrameWidth * 2 + TitleTextBlock.RenderSize.Height + OkButton.RenderSize.Height + padding * 2) * scaleFactor - padding * 4);
     double detailWidth = DetailView.Width / scaleFactor - 15;
     double detailHeight = DetailPanel.Children.MyApply(v => v.ToList().ForEach(child => child.Measure(new(detailWidth,double.PositiveInfinity)))).Sum(v => Math.Max(BasicStyle.textHeight,v.DesiredSize.Height));
     DetailPanel.Margin = new(detailWidth * (scaleFactor - 1) / 2,0, detailWidth * (scaleFactor - 1) / 2, detailHeight * (scaleFactor - 1));

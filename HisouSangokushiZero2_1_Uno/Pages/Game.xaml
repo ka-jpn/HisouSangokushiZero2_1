@@ -26,7 +26,7 @@
     <StackPanel x:Name="TurnLogPanel" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="270"/>
     <StackPanel x:Name="TurnFillDreamConditionPanel" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
     <Canvas x:Name="CountryPostsPanel" Grid.Row="1" HorizontalAlignment="Stretch" Height="{x:Bind code:UIUtil.countryPersonPutPanelHeight}" Background="Transparent"/>
-    <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="3">
+    <Grid x:Name="MainGrid" Grid.Row="0" Grid.RowSpan="2">
       <local:Ask x:Name="AskPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       <local:Character x:Name="CharacterRemarkPanel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       <Canvas x:Name="MovePersonCanvas"/>

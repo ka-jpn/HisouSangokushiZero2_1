@@ -1,7 +1,6 @@
 ﻿using HisouSangokushiZero2_1_Uno.Code;
 using HisouSangokushiZero2_1_Uno.Data;
 using HisouSangokushiZero2_1_Uno.MyUtil;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -90,7 +89,7 @@ internal sealed partial class Character:UserControl {
   }
   internal void ResizeElem(UIElement parent) {
     double contentScale = 1.2;
-    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize with { Width = parent.RenderSize.Width / contentScale }) * contentScale;
+    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize with { Width = parent.RenderSize.Width / contentScale }) * contentScale * UIUtil.GetZoomFactor();
     double sideMargin = UIUtil.infoFrameWidth * scaleFactor;
     double contentMaxWidth = (parent.RenderSize.Width - sideMargin * 2) / scaleFactor;
     double textMaxWidth = contentMaxWidth - personImageSize - 5 * 2;

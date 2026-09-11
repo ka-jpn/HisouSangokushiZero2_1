@@ -27,7 +27,7 @@ internal sealed partial class ProductionInfo : UserControl {
         UpdateNoteButton.Click += (_, _) => ShowProductionInfoButton(ProductionInfoState.UpdateNote);
         AdditionalNoteButton.Click += (_, _) => ShowProductionInfoButton(ProductionInfoState.AdditionalNote);
         void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
           double contentWidth = RenderSize.Width / scaleFactor - 5;
           ContentPanel.Width = contentWidth;
           ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor, ScaleY = scaleFactor };

@@ -37,6 +37,7 @@ internal static class UIUtil {
   internal static readonly Color transparentColor = new(0,0,0,0);
   internal static readonly Color dataBackColor = new(255,150,150,150);
   internal static readonly Thickness dataMargin = new(1);
+  internal static double zoomLevel = 0;
   internal static SKSvg? mapSvg = null;
   internal static SKSvg? armySvg = null;
   internal static ViewMode viewMode = ViewMode.fix;
@@ -69,6 +70,7 @@ internal static class UIUtil {
     Uno.Foundation.WebAssemblyRuntime.InvokeJS($"window.parent.{viewMode}();");
 #endif
   }
+  internal static double GetZoomFactor() => Math.Pow(1.1,zoomLevel);
   internal static double GetScaleFactor(Windows.Foundation.Size size) => Math.Max(size.Width / mapSize.Width,size.Height / mapSize.Height);
   internal static void ReverseVisibility(UIElement elem) => elem.Visibility = ToVisibility(elem.Visibility.IsHidden());
   internal static void SetVisibility(UIElement elem,bool isShow) => ToVisibility(isShow).MyApply(v=>elem.Visibility = v,v=>elem.Visibility != v);

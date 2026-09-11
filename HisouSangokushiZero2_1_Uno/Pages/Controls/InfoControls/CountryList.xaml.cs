@@ -23,7 +23,7 @@ internal sealed partial class CountryList:UserControl {
         SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
         CountryScroll.SizeChanged += (_, _) => CountryItemsRepeater.Width = CountryScroll.RenderSize.Width;
         void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
           double pageWidth = RenderSize.Width;
           double contentWidth = RenderSize.Width / scaleFactor - 5;
           ContentPanel.Width = contentWidth;

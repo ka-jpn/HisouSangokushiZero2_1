@@ -35,7 +35,6 @@ public sealed partial class Game:Page {
   private (Panel panel, PersonId person)? pick = null;
   private double lastScaleFactor = double.NaN;
   private double mapScale = 1;
-  internal static double zoomLevel = 0;
   internal static readonly double initContentGridMaxWidth = UIUtil.GetContentMaxWidth();
   public Game() {
     InitializeComponent();
@@ -105,7 +104,7 @@ public sealed partial class Game:Page {
         TopSwitchViewModeButton.Click += (_,_) => UIUtil.SwitchViewMode();
       }
       void ResizeMap() {
-        double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * GetZoomFactor();
+        double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * UIUtil.GetZoomFactor();
         double horizontalScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
         StateInfo.ResizeElem(StateInfoPanel, horizontalScaleFactor, mapScaleFactor);
         HegemonyPoint.ResizeElem(HegemonyPointPanel, horizontalScaleFactor, mapScaleFactor);
@@ -602,7 +601,7 @@ public sealed partial class Game:Page {
       await Dispatcher.RunAsync(CoreDispatcherPriority.Low,()=>TurnLogPanel.Children.Remove(panel));
       await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,ResizeTurnLogUI);
     });
-    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) *GetZoomFactor();
+    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) *UIUtil.GetZoomFactor();
   }
   private async void UpdateTurnFillDreamConditionUI(GameState game) {
     DateTime startTime = DateTime.Now;
@@ -618,7 +617,7 @@ public sealed partial class Game:Page {
       ]))
     ]);
     TurnFillDreamConditionPanel.MySetChildren([panel]);
-    RescaleTurnFillDreamConditionPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * GetZoomFactor());
+    RescaleTurnFillDreamConditionPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetZoomFactor());
     await Task.Run(async () => {
       await Task.Delay(startAnimationDelay);
       await Enumerable.Range(1,transparentFrameCount).MyAsyncForEachSequential(async v => {
@@ -648,9 +647,8 @@ public sealed partial class Game:Page {
     });
     TurnLogPanel.Children.Add(panel);
     ResizeTurnLogUI();
-    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) * GetZoomFactor();
+    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetZoomFactor();
   }
-  private static double GetZoomFactor() => Math.Pow(1.1,zoomLevel);
   private GameState PutPersonPanel(GameState game) {
     if(pick != null) {
       GameState newGameState = game.MyPipe(SwapPerson).MyPipe(PutPerson);

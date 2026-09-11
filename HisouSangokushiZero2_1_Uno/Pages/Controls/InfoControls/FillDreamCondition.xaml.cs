@@ -24,7 +24,7 @@ internal sealed partial class FillDreamCondition:UserControl {
         SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
         FillDreamConditionScroll.SizeChanged += (_, _) => FillDreamConditionItemsRepeater.Width = FillDreamConditionScroll.RenderSize.Width;
         void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
+          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
           double contentWidth = RenderSize.Width / scaleFactor - 5;
           ContentPanel.Width = contentWidth;
           ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor,ScaleY = scaleFactor };
