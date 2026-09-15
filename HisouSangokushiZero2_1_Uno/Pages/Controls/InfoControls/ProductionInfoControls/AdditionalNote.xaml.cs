@@ -14,16 +14,12 @@ internal sealed partial class AdditionalNote:UserControl {
     MyInit(this);
     void MyInit(AdditionalNote page) {
       CloseButton.Click += (_, _) => close();
-      page.SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
-      void ResizeElem(UIElement parent) {
-        double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize);
-        double contentWidth = page.RenderSize.Width / scaleFactor - 15; ContentPanel.Width = contentWidth;
-        ContentPanel.Children.ToList().ForEach(child => child.Measure(new(ContentPanel.Width, double.PositiveInfinity)));
-        ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor, ScaleY = scaleFactor };
-        ContentPanel.Margin = new(0, 0, contentWidth * (scaleFactor - 1), ContentPanel.Children.Sum(v => v.DesiredSize.Height) * (scaleFactor - 1));
+      page.SizeChanged += (_, _) => ResizeElem();
+      void ResizeElem() {
+        double contentWidth = page.RenderSize.Width - 15;
+        ContentPanel.Width = contentWidth;
       }
     }
   }
-  internal static void InitParentElem(UIElement parentElem) => parent = parentElem;
   internal static void InitCloseAction(Action closeAction) => close = closeAction;
 }

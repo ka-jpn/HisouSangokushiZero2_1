@@ -16,33 +16,29 @@ namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record PersonListData(Brush Brush,ECountry? Country,string Name,string Role,ImageSource RoleImage,int Rank,int BirthYear,string AppearYear,int DeathYear,string Biography);
 internal sealed partial class PersonList:UserControl {
   private enum SortButtonKind { 国役割別, ランク順, 生年順, 没年順 };
-  private static UIElement? parent = null;
   internal const double itemsRepeaterWidth = 750;
   internal PersonList() {
     InitializeComponent();
-    MyInit();
-    void MyInit() {
-      SortButtonKind initSortKind = SortButtonKind.国役割別;
+    MyInit(this);
+    void MyInit(PersonList page) {
+      SortButtonKind sortKind = Enum.GetValues<SortButtonKind>().First();
       Dictionary<SortButtonKind, Func<Dictionary<PersonId, PersonData>, Dictionary<PersonId, PersonData>>> buttonActionMap = new([
         new(SortButtonKind.国役割別,v =>v.OrderBy(v => v.Value.Country).ThenBy(v => v.Value.Role).ThenBy(v => v.Value.BirthYear).ToDictionary()),
         new(SortButtonKind.ランク順,v =>v.OrderByDescending(v => v.Value.Rank).ThenBy(v => v.Value.BirthYear).ToDictionary()),
         new(SortButtonKind.生年順,v =>v.OrderBy(v => v.Value.BirthYear).ToDictionary()),
         new(SortButtonKind.没年順,v =>v.OrderBy(v => v.Value.DeathYear).ToDictionary())
       ]);
-      AttachEvent();
+      AttachEvent(page);
       SetUIElements();
-      void AttachEvent() {
-        SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
+      void AttachEvent(PersonList page) {
+        page.SizeChanged += (_, _) => ResizeElem();
         PersonScroll.SizeChanged += (_, _) => PersonItemsRepeater.Width = PersonScroll.RenderSize.Width;
-        void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
+        void ResizeElem() {
           double pageWidth = RenderSize.Width;
-          double contentWidth = RenderSize.Width / scaleFactor - 5;
+          double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;
-          ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor, ScaleY = scaleFactor };
-          ContentPanel.Margin = new(0, 0, contentWidth * (scaleFactor - 1), ContentPanel.Children.Sum(v => v.DesiredSize.Height) * (scaleFactor - 1));
           SortButtonPanel.Children.OfType<Button>().ToList().ForEach(v => v.Width = contentWidth / 4 - 5 * 2);
-          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetScaleFactor(parent.RenderSize))));
+          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*Game.uiScale)));
         }
       }
       void SetUIElements() {
@@ -51,10 +47,10 @@ internal sealed partial class PersonList:UserControl {
         ScenarioComboBox.SelectedIndex = 0;
         ScenarioComboBox.SelectionChanged += (_, _) => LoadScenarioData(ScenarioComboBox.SelectedIndex);
         SortButtonPanel.MySetChildren([.. CreateSortButtons()]);
-        RefreshSortButtonPanelColor(SortButtonPanel, initSortKind);
+        RefreshSortButtonPanelColor(SortButtonPanel, sortKind);
         void LoadScenarioData(int scenarioNo) {
           ScenarioData? maybeScenario = GetScenarioData(scenarioNo);
-          UpdatePersonItemsRepeater(maybeScenario, initSortKind);
+          UpdatePersonItemsRepeater(maybeScenario, sortKind);
         }
         List<Button> CreateSortButtons() {
           return [.. buttonActionMap.Keys.Select(CreateSortButton)];
@@ -63,6 +59,7 @@ internal sealed partial class PersonList:UserControl {
               ScenarioData? maybeScenario = GetScenarioData(ScenarioComboBox.SelectedIndex);
               UpdatePersonItemsRepeater(maybeScenario, buttonKind);
               RefreshSortButtonPanelColor(SortButtonPanel, buttonKind);
+              sortKind = buttonKind;
             });
           }
         }
@@ -81,5 +78,4 @@ internal sealed partial class PersonList:UserControl {
       }
     }
   }
-  internal static void Init(UIElement parentElem) => parent = parentElem;
 }

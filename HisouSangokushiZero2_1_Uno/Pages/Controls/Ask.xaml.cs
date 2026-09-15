@@ -35,7 +35,7 @@ internal sealed partial class Ask:UserControl {
     parent?.MyApply(page.ResizeElem);
   }
   internal void ResizeElem(UIElement parent) {
-    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
+    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetMapZoomFactor();
     double sideMargin = UIUtil.infoFrameWidth * scaleFactor;
     double contentWidth = RenderSize.Width - sideMargin * 2 - padding * 2;
     Content.Margin = new(sideMargin,sideMargin,sideMargin,0);

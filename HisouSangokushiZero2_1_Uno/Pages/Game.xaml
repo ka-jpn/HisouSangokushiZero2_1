@@ -32,24 +32,24 @@
       <Canvas x:Name="MovePersonCanvas"/>
     </Grid>
     <Grid x:Name="InfoFramePanel" Grid.Row="0">
-      <Grid x:Name="InfoLayoutPanel">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Button x:Name="TopSwitchViewModeButton" Width="{x:Bind code:UIUtil.infoFrameWidth}" Height="{x:Bind code:UIUtil.infoFrameWidth}" Background="#AFFF" Padding="0">
-          <TextBlock FontSize="18" LineHeight="18" x:Name="SwitchViewModeButtonText"/>
-        </Button>
-        <Button x:Name="OpenLogButton" Grid.Column="1" Height="{x:Bind code:UIUtil.infoFrameWidth}" HorizontalAlignment="Stretch" Background="#AEFE" Padding="0">
-          <TextBlock FontSize="18" LineHeight="18" Text="ログ"/>
-        </Button>
-        <Button x:Name="OpenInfoButton" Grid.Row="1" Width="{x:Bind code:UIUtil.infoFrameWidth}" VerticalAlignment="Stretch" Background="#AEEF" Padding="0">
-          <TextBlock FontSize="18" LineHeight="18" Text="情&#xa;報"/>
-        </Button>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Button x:Name="TopSwitchViewModeButton" Width="{x:Bind code:UIUtil.infoFrameWidth}" Height="{x:Bind code:UIUtil.infoFrameWidth}" Background="#AFFF" Padding="0">
+        <TextBlock FontSize="18" LineHeight="18" x:Name="SwitchViewModeButtonText"/>
+      </Button>
+      <Button x:Name="OpenLogButton" Grid.Column="1" Height="{x:Bind code:UIUtil.infoFrameWidth}" HorizontalAlignment="Stretch" Background="#AEFE" Padding="0">
+        <TextBlock FontSize="18" LineHeight="18" Text="ログ"/>
+      </Button>
+      <Button x:Name="OpenInfoButton" Grid.Row="1" Width="{x:Bind code:UIUtil.infoFrameWidth}" VerticalAlignment="Stretch" Background="#AEEF" Padding="0">
+        <TextBlock FontSize="18" LineHeight="18" Text="情&#xa;報"/>
+      </Button>
+      <Grid x:Name="InfoContentPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <local:GameLog x:Name="GameLogPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
         <local:ExInfo x:Name="ExInfoPanel" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Collapsed"/>
       </Grid>

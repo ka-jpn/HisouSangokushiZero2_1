@@ -11,25 +11,21 @@ using static HisouSangokushiZero2_1_Uno.Code.DefType;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record CountryListData(Brush Brush,ECountry Country,decimal Fund,int SleepTurnNum,string AreasText);
 internal sealed partial class CountryList:UserControl {
-  private static UIElement? parent = null;
   internal const double itemsRepeaterWidth = 750;
   internal CountryList() {
     InitializeComponent();
-    MyInit();
-    void MyInit() {
-      AttachEvent();
+    MyInit(this);
+    void MyInit(CountryList page) {
+      AttachEvent(page);
       SetUIElements();
-      void AttachEvent() {
-        SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
+      void AttachEvent(CountryList page) {
+        page.SizeChanged += (_, _) => ResizeElem();
         CountryScroll.SizeChanged += (_, _) => CountryItemsRepeater.Width = CountryScroll.RenderSize.Width;
-        void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
+        void ResizeElem() {
           double pageWidth = RenderSize.Width;
-          double contentWidth = RenderSize.Width / scaleFactor - 5;
+          double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;
-          ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor, ScaleY = scaleFactor };
-          ContentPanel.Margin = new(0, 0, contentWidth * (scaleFactor - 1), ContentPanel.Children.Sum(v => v.DesiredSize.Height) * (scaleFactor - 1));
-          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetScaleFactor(parent.RenderSize))));
+          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*Game.uiScale)));
         }
       }
       void SetUIElements() {
@@ -52,5 +48,4 @@ internal sealed partial class CountryList:UserControl {
       }
     }
   }
-  internal static void Init(UIElement parentElem) => parent = parentElem;
 }

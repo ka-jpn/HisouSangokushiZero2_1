@@ -89,7 +89,7 @@ internal sealed partial class Character:UserControl {
   }
   internal void ResizeElem(UIElement parent) {
     double contentScale = 1.2;
-    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize with { Width = parent.RenderSize.Width / contentScale }) * contentScale * UIUtil.GetZoomFactor();
+    double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize with { Width = parent.RenderSize.Width / contentScale }) * contentScale * UIUtil.GetMapZoomFactor();
     double sideMargin = UIUtil.infoFrameWidth * scaleFactor;
     double contentMaxWidth = (parent.RenderSize.Width - sideMargin * 2) / scaleFactor;
     double textMaxWidth = contentMaxWidth - personImageSize - 5 * 2;

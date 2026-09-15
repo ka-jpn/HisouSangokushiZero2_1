@@ -29,12 +29,13 @@ public sealed partial class Game:Page {
   ])).ToDictionary();
   private static readonly Dictionary<EArea,AreaElems> areaElemsMap = [];
   private static readonly Dictionary<ERole, Grid> countryPostPanelMap = [];
-  private readonly List<TaskToken> animationTaskTokens = [];
+  private static readonly List<TaskToken> animationTaskTokens = [];
   private ERole activePanelRole = ERole.Central;
   private (Panel panel, Post post)? pointerover = null;
   private (Panel panel, PersonId person)? pick = null;
   private double lastScaleFactor = double.NaN;
   private double mapScale = 1;
+  internal static double uiScale = 1;
   internal static readonly double initContentGridMaxWidth = UIUtil.GetContentMaxWidth();
   public Game() {
     InitializeComponent();
@@ -44,7 +45,8 @@ public sealed partial class Game:Page {
       SetCountryPostsPanel(GameData.game);
       MapImage.Source = Image.GetSvgImageSource("Map",UIUtil.mapSize.Width*2,UIUtil.mapSize.Height*2);
       UIUtil.SwitchViewModeActions.Add(RefreshViewMode);
-      UIUtil.ChangeScaleActions.Add(ResizeMap);
+      UIUtil.ChangeMapScaleActions.Add(ResizeMap);
+      UIUtil.ChangeInfoTextZoomActions.Add(ResizeInfoContent);
       Ask.Init(MainGrid);
       Character.Init(MainGrid);
       UIUtil.SaveGameActions.Add(async () => {
@@ -78,6 +80,8 @@ public sealed partial class Game:Page {
           await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => ShowMessage([Text.ProgressInitText()]));
           await InitGame(GetGame.GetInitGameScenario(GameData.game.NowScenario));
           await Task.Yield();
+          GameData.startingPlayTotalTime = TimeSpan.Zero;
+          await Task.Yield();
           await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => ShowMessage([Text.CompleteInitText()]));
         });
       });
@@ -96,7 +100,8 @@ public sealed partial class Game:Page {
       }
       void AttachEvent(Game page) {
         MainGrid.SizeChanged += (_, _) => ResizeMap();
-        InfoFramePanel.SizeChanged += (_, _) => ResizeInfo();
+        InfoFramePanel.SizeChanged += (_, _) => ResizeInfoFrame();
+        InfoContentPanel.SizeChanged += (_, _) => ResizeInfoContent();
         OpenLogButton.Click += (_,_) => { UIUtil.ReverseVisibility(GameLogPanel); UIUtil.SetVisibility(ExInfoPanel, false); };
         OpenInfoButton.Click += (_,_) => { UIUtil.ReverseVisibility(ExInfoPanel); UIUtil.SetVisibility(GameLogPanel, false); };
         page.PointerMoved += (_,e) => (pick is { } && MovePersonCanvas.Children.SingleOrDefault() is UIElement personPanel ? () => MovePerson(personPanel,e) : MyUtil.MyUtil.nothing).Invoke();
@@ -104,16 +109,17 @@ public sealed partial class Game:Page {
         TopSwitchViewModeButton.Click += (_,_) => UIUtil.SwitchViewMode();
       }
       void ResizeMap() {
-        double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * UIUtil.GetZoomFactor();
-        double horizontalScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
-        StateInfo.ResizeElem(StateInfoPanel, horizontalScaleFactor, mapScaleFactor);
-        HegemonyPoint.ResizeElem(HegemonyPointPanel, horizontalScaleFactor, mapScaleFactor);
+        double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * UIUtil.GetMapZoomFactor();
+        double uiScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
+        StateInfo.ResizeElem(StateInfoPanel, uiScaleFactor, mapScaleFactor);
+        HegemonyPoint.ResizeElem(HegemonyPointPanel, uiScaleFactor, mapScaleFactor);
         RelayoutCountryPostUI(mapScaleFactor);
         if (mapScaleFactor != lastScaleFactor) {
           RescaleMap(mapScaleFactor);
           lastScaleFactor = mapScaleFactor;
         }
         mapScale = mapScaleFactor;
+        uiScale = uiScaleFactor;
         void RescaleMap(double scaleFactor) {
           ScaleTransform mapScaleTransform = new() { ScaleX = mapScaleFactor, ScaleY = mapScaleFactor };
           CountryPostsPanel.Margin = new(0, 0, MainGrid.RenderSize.Width * (scaleFactor - 1), CountryPostsPanel.Height * (scaleFactor - 1));
@@ -135,10 +141,20 @@ public sealed partial class Game:Page {
           countryPostPanelMap.Values.Select((elem, index) => (elem, index)).ToList().ForEach(v => Canvas.SetLeft(v.elem, PostPanelLeftUnit * v.index));
         }
       }
-      void ResizeInfo() {
-        InfoLayoutPanel.Margin = new(0, 0, InfoFramePanel.RenderSize.Width / mapScale * (mapScale - 1), InfoFramePanel.RenderSize.Height / mapScale * (mapScale - 1));
-        InfoLayoutPanel.RenderTransform = new ScaleTransform() { ScaleX = mapScale, ScaleY = mapScale };
-        InfoLayoutPanel.Width = InfoFramePanel.RenderSize.Width / mapScale;
+      void ResizeInfoFrame() {
+        TopSwitchViewModeButton.Margin = new(0, 0, UIUtil.infoFrameWidth * (mapScale - 1), UIUtil.infoFrameWidth * (mapScale - 1));
+        TopSwitchViewModeButton.RenderTransform = new ScaleTransform() { ScaleX = mapScale, ScaleY = mapScale };
+        OpenLogButton.Margin = new(0, 0, (InfoFramePanel.RenderSize.Width / mapScale - UIUtil.infoFrameWidth) * (mapScale - 1), UIUtil.infoFrameWidth * (mapScale - 1));
+        OpenLogButton.RenderTransform = new ScaleTransform() { ScaleX = mapScale, ScaleY = mapScale };
+        OpenInfoButton.Margin = new(0, 0, UIUtil.infoFrameWidth * (mapScale - 1), (InfoFramePanel.RenderSize.Height / mapScale - UIUtil.infoFrameWidth) * (mapScale - 1));
+        OpenInfoButton.RenderTransform = new ScaleTransform() { ScaleX = mapScale, ScaleY = mapScale };
+      }
+      void ResizeInfoContent() {
+        double scaleFactor = UIUtil.GetScaleFactor(InfoContentPanel.RenderSize) * UIUtil.GetInfoTextZoomFactor();
+        GameLogPanel.Margin = new(0, 0, InfoContentPanel.RenderSize.Width * (1 - 1/scaleFactor), InfoContentPanel.RenderSize.Height * (1 - 1/scaleFactor));
+        GameLogPanel.RenderTransform = new ScaleTransform() { ScaleX = scaleFactor, ScaleY = scaleFactor };
+        ExInfoPanel.Margin = new(0, 0, InfoContentPanel.RenderSize.Width * (1 - 1/scaleFactor), InfoContentPanel.RenderSize.Height * (1 - 1/scaleFactor));
+        ExInfoPanel.RenderTransform = new ScaleTransform() { ScaleX = scaleFactor, ScaleY = scaleFactor };
       }
       void SetCountryPostsPanel(GameState game) {
         Dictionary<ERole, Color> countryRolePanelColorMap = new([
@@ -601,7 +617,7 @@ public sealed partial class Game:Page {
       await Dispatcher.RunAsync(CoreDispatcherPriority.Low,()=>TurnLogPanel.Children.Remove(panel));
       await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,ResizeTurnLogUI);
     });
-    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) *UIUtil.GetZoomFactor();
+    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) *UIUtil.GetMapZoomFactor();
   }
   private async void UpdateTurnFillDreamConditionUI(GameState game) {
     DateTime startTime = DateTime.Now;
@@ -617,7 +633,7 @@ public sealed partial class Game:Page {
       ]))
     ]);
     TurnFillDreamConditionPanel.MySetChildren([panel]);
-    RescaleTurnFillDreamConditionPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetZoomFactor());
+    RescaleTurnFillDreamConditionPanelUI(UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetMapZoomFactor());
     await Task.Run(async () => {
       await Task.Delay(startAnimationDelay);
       await Enumerable.Range(1,transparentFrameCount).MyAsyncForEachSequential(async v => {
@@ -647,7 +663,7 @@ public sealed partial class Game:Page {
     });
     TurnLogPanel.Children.Add(panel);
     ResizeTurnLogUI();
-    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetZoomFactor();
+    void ResizeTurnLogUI() => TurnLogPanel.Height = TurnLogPanel.Children.OfType<FrameworkElement>().Sum(v => v.Height) * UIUtil.GetScaleFactor(MainGrid.RenderSize) * UIUtil.GetMapZoomFactor();
   }
   private GameState PutPersonPanel(GameState game) {
     if(pick != null) {

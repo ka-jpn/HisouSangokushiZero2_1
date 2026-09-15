@@ -37,11 +37,13 @@ internal static class UIUtil {
   internal static readonly Color transparentColor = new(0,0,0,0);
   internal static readonly Color dataBackColor = new(255,150,150,150);
   internal static readonly Thickness dataMargin = new(1);
-  internal static double zoomLevel = 0;
+  internal static double mapZoomLevel = 0;
+  internal static double infoTextZoomLevel = 0;
   internal static SKSvg? mapSvg = null;
   internal static SKSvg? armySvg = null;
   internal static ViewMode viewMode = ViewMode.fix;
-  internal static List<Action> ChangeScaleActions = [];
+  internal static List<Action> ChangeMapScaleActions = [];
+  internal static List<Action> ChangeInfoTextZoomActions = [];
   internal static List<Action> SwitchViewModeActions = [];
   internal static List<Action> SaveGameActions = [];
   internal static List<Action> LoadGameActions = [];
@@ -70,7 +72,8 @@ internal static class UIUtil {
     Uno.Foundation.WebAssemblyRuntime.InvokeJS($"window.parent.{viewMode}();");
 #endif
   }
-  internal static double GetZoomFactor() => Math.Pow(1.1,zoomLevel);
+  internal static double GetMapZoomFactor() => Math.Pow(1.1,mapZoomLevel);
+  internal static double GetInfoTextZoomFactor() => Math.Pow(1.1,infoTextZoomLevel);
   internal static double GetScaleFactor(Windows.Foundation.Size size) => Math.Max(size.Width / mapSize.Width,size.Height / mapSize.Height);
   internal static void ReverseVisibility(UIElement elem) => elem.Visibility = ToVisibility(elem.Visibility.IsHidden());
   internal static void SetVisibility(UIElement elem,bool isShow) => ToVisibility(isShow).MyApply(v=>elem.Visibility = v,v=>elem.Visibility != v);

@@ -103,6 +103,10 @@
             <TextBlock Text="・スマホで首都ポストのパネルの重なり順の更新が正しくないことがあるのを修正"/>
             <TextBlock Text="・蜀之南征シナリオの人物列伝を記入完了し、全列伝記入完了"/>
           </StackPanel>
+          <TextBlock Text="2026/09/15 ver1.25 情報タブの内訳など微修正"/>
+          <StackPanel Padding="20,0,0,0">
+            <TextBlock Text="・情報とログのテキストサイズをマップスケールとは別に設定できるように"/>
+          </StackPanel>
         </StackPanel>
       </StackPanel>
     </ScrollViewer>

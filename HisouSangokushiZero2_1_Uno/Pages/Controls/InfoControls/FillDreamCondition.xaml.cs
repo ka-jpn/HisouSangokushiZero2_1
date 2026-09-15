@@ -13,7 +13,6 @@ namespace HisouSangokushiZero2_1_Uno.Pages;
 internal record FillDreamConditionData(Brush Brush,ECountry Country,string FillDreamConditionText);
 internal sealed partial class FillDreamCondition:UserControl {
   private const double itemsRepeaterWidth = 750;
-  private static UIElement? parent = null;
   internal FillDreamCondition() {
     InitializeComponent();
     MyInit(this);
@@ -21,15 +20,12 @@ internal sealed partial class FillDreamCondition:UserControl {
       AttachEvent(page);
       SetUIElements();
       void AttachEvent(FillDreamCondition page) {
-        SizeChanged += (_, _) => parent?.MyApply(ResizeElem);
+        page.SizeChanged += (_, _) => ResizeElem();
         FillDreamConditionScroll.SizeChanged += (_, _) => FillDreamConditionItemsRepeater.Width = FillDreamConditionScroll.RenderSize.Width;
-        void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
-          double contentWidth = RenderSize.Width / scaleFactor - 5;
+        void ResizeElem() {
+          double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;
-          ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor,ScaleY = scaleFactor };
-          ContentPanel.Margin = new(0,0,contentWidth * (scaleFactor - 1),ContentPanel.Children.Sum(v => v.RenderSize.Height) * (scaleFactor - 1));
-          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetScaleFactor(parent.RenderSize))));
+          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*Game.uiScale)));
         }
       }
       void SetUIElements() {
@@ -55,5 +51,4 @@ internal sealed partial class FillDreamCondition:UserControl {
       }
     }
   }
-  internal static void Init(UIElement parentElem) => parent = parentElem;
 }

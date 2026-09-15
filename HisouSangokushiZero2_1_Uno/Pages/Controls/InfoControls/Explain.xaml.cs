@@ -2,7 +2,6 @@
 using HisouSangokushiZero2_1_Uno.MyUtil;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,6 @@ internal sealed partial class Explain:UserControl {
   private static Dictionary<double,Rectangle> judgeMaxPointRects = [];
   private static Dictionary<AttackJudge,Dictionary<double,TextBlock>> judgeThresholdPointTexts = [];
   private static Dictionary<double,TextBlock> rankDiffTexts = [];
-  private static UIElement? parent = null;
   internal Explain() {
     InitializeComponent();
     MyInit(this);
@@ -28,15 +26,11 @@ internal sealed partial class Explain:UserControl {
       AttachEvent(page);
       SetAttackJudgeExplain();
       void AttachEvent(Explain page) {
-        page.SizeChanged += (_,_) => parent?.MyApply(ResizeElem);
-        void ResizeElem(UIElement parent) {
-          double scaleFactor = UIUtil.GetScaleFactor(parent.RenderSize) * UIUtil.GetZoomFactor();
-          double contentWidth = RenderSize.Width / scaleFactor - 5;
+        page.SizeChanged += (_,_) => ResizeElem();
+        void ResizeElem() {
+          double contentWidth = RenderSize.Width - 5;
           Size judgeViewSize = new(Math.Min(AttackJudgeExplainPanel.MaxWidth,contentWidth - BattleExplainCaption.DesiredSize.Width),AttackJudgeExplainPanel.Height);
           ContentPanel.Width = contentWidth;
-          ContentPanel.Children.ToList().ForEach(child => child.Measure(new(ContentPanel.Width, double.PositiveInfinity)));
-          ContentPanel.RenderTransform = new ScaleTransform { ScaleX = scaleFactor,ScaleY = scaleFactor };
-          ContentPanel.Margin = new(0,0,contentWidth * (scaleFactor - 1),ContentPanel.Children.Sum(v => v.DesiredSize.Height) * (scaleFactor - 1));
           AttackJudgeExplainPanel.Width = judgeViewSize.Width;
           judgePointMap.GetValueOrDefault(AttackJudge.Crush)?.Values.Concat(judgePointMap.GetValueOrDefault(AttackJudge.Win)?.Values.Reverse() ?? [])?.Select(crd => CookPoint(judgeViewSize,crd)).MyApply(crds => AttackCrushShape.Points = [.. crds.Select(v => new Windows.Foundation.Point(v.X,v.Y))]);
           judgePointMap.GetValueOrDefault(AttackJudge.Win)?.Values.Concat(judgePointMap.GetValueOrDefault(AttackJudge.Lose)?.Values.Reverse() ?? [])?.Select(crd => CookPoint(judgeViewSize,crd)).MyApply(crds => AttackWinShape.Points = [.. crds.Select(v => new Windows.Foundation.Point(v.X,v.Y))]);
@@ -83,5 +77,4 @@ internal sealed partial class Explain:UserControl {
       }
     }
   }
-  internal static void Init(UIElement parentElem) => parent = parentElem;
 }
