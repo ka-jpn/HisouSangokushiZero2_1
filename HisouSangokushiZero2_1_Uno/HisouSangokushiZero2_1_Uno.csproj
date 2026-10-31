@@ -22,6 +22,7 @@
       SkiaRenderer;
       Svg;
     </UnoFeatures>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MessagePack" />

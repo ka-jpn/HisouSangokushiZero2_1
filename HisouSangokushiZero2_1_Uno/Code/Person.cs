@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static HisouSangokushiZero2_1_Uno.Code.DefType;
-using static HisouSangokushiZero2_1_Uno.Code.UIUtil;
 using PostType = HisouSangokushiZero2_1_Uno.Code.DefType.Post;
 namespace HisouSangokushiZero2_1_Uno.Code {
   internal static class Person {

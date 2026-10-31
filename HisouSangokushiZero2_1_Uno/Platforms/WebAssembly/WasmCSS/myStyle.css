@@ -1,7 +1,35 @@
 .uno-loader .logo {
-  max-width: min(95%, 600px);
-  max-height: min(95%, 600px);
+  max-width: min(95cqw, 90cqh, 600px);
+  max-height: min(95cqw, 90cqh, 600px);
+  position: absolute;
 }
+
 .uno-loader progress {
   height: 15%;
+}
+
+
+body{
+  background-color: #EFEE;
+}
+
+.uno-loader {
+  top: 100px;
+  width: 1000px;
+  left: unset;
+  right: unset;
+  position: fixed;
+}
+
+#uno-body {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  top: 0;
+  z-index: -1;
+}
+
+.fit{
+  z-index: 0 !important;
 }

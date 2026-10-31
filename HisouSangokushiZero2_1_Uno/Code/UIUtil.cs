@@ -4,7 +4,6 @@ using HisouSangokushiZero2_1_Uno.Pages.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Svg.Skia;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,8 +38,7 @@ internal static class UIUtil {
   internal static readonly Thickness dataMargin = new(1);
   internal static double mapZoomLevel = 0;
   internal static double infoTextZoomLevel = 0;
-  internal static SKSvg? mapSvg = null;
-  internal static SKSvg? armySvg = null;
+  internal static StackPanel? headerPadding = null;
   internal static ViewMode viewMode = ViewMode.fix;
   internal static List<Action> ChangeMapScaleActions = [];
   internal static List<Action> ChangeInfoTextZoomActions = [];
@@ -48,8 +46,6 @@ internal static class UIUtil {
   internal static List<Action> SaveGameActions = [];
   internal static List<Action> LoadGameActions = [];
   internal static List<Action> InitGameActions = [];
-  internal static Task loadFontTask = new(() => { });
-  internal static Task loadMapTask = new(() => { });
   internal static TextBlock[] CreateWithShadow(Func<TextBlock> createTextBlock, double shadowWidth, Windows.UI.Color shadowColor, int shadowCount = 8) {
     return [.. CreateShadowTranslates(shadowWidth, shadowCount).Select(margin => createTextBlock().MyApply(v => v.RenderTransform = margin).MyApply(v => v.Foreground = shadowColor)), createTextBlock()];
     static List<TranslateTransform> CreateShadowTranslates(double shadowWidth, int shadowCount) => [.. Enumerable.Range(0, shadowCount).Select(i => 2 * Math.PI / shadowCount * i).Select(angle => new TranslateTransform() { X = Math.Cos(angle) * shadowWidth, Y = Math.Sin(angle) * shadowWidth })];

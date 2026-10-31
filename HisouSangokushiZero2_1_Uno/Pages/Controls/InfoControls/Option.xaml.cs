@@ -6,6 +6,7 @@ namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class Option:UserControl {
   private const int minMapZoomLevel = 0, maxMapZoomLevel = 5;
   private const int minInfoTextZoomLevel = 0, maxInfoTextZoomLevel = 5;
+  internal static Action ToTitlePage = () => throw new Exception();
   internal Option() {
     InitializeComponent();
     MyInit(this);
@@ -25,7 +26,7 @@ internal sealed partial class Option:UserControl {
         SaveGameButton.Click += (_,_) => UIUtil.SaveGame();
         LoadGameButton.Click += (_,_) => UIUtil.LoadGame();
         InitGameButton.Click += (_,_) => UIUtil.InitGame();
-        BackTitleButton.Click += (_,_) => (Window.Current?.Content as Frame)?.Navigate(typeof(Title));
+        BackTitleButton.Click += (_,_) => ToTitlePage();
         void ResizeElem() {
           double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;

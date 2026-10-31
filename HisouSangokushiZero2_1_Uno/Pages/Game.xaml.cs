@@ -20,7 +20,7 @@ using Image = HisouSangokushiZero2_1_Uno.Code.Image;
 using Post = HisouSangokushiZero2_1_Uno.Code.DefType.Post;
 using Text = HisouSangokushiZero2_1_Uno.Data.Language.Text;
 namespace HisouSangokushiZero2_1_Uno.Pages;
-public sealed partial class Game:Page {
+internal sealed partial class Game:Page {
   private record AreaElems(Border Back,TextBlock AreaNameText,StackPanel DefensePersonPanel,StackPanel AffairPersonPanel,Post DefensePost,Post AffairPost,TextBlock AffairText,TextBlock ExText,Grid WrapPanel);
   private static readonly double countryPostPanelWidth = 255;
   private static readonly Dictionary<Post,StackPanel> playerCountryPostPersonPanel = Enum.GetValues<ERole>().SelectMany(role => new List<(Post, StackPanel)>([
@@ -37,7 +37,7 @@ public sealed partial class Game:Page {
   private double mapScale = 1;
   internal static double uiScale = 1;
   internal static readonly double initContentGridMaxWidth = UIUtil.GetContentMaxWidth();
-  public Game() {
+  internal Game() {
     InitializeComponent();
     MyInit(this);
     void MyInit(Game page) {

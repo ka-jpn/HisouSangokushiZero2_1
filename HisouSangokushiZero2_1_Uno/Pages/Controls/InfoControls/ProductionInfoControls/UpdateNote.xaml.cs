@@ -1,10 +1,5 @@
-﻿using HisouSangokushiZero2_1_Uno.Code;
-using HisouSangokushiZero2_1_Uno.MyUtil;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Linq;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class UpdateNote:UserControl {
   private static Action close = MyUtil.MyUtil.nothing;

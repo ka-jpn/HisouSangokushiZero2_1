@@ -24,6 +24,7 @@
         <StackPanel Height="10"/>
         <TextBlock Text="制作：かりんとう" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBlock Text="スペシャルサンクス：弁さん" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <StackPanel Height="10"/>
         <TextBlock Text="弁さんに列伝の記入をご協力いただきました" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <StackPanel Height="20"/>
         <TextBlock Text="かりんとうゲームズ" HorizontalAlignment="Center" VerticalAlignment="Center"/>

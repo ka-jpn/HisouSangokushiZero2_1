@@ -8,7 +8,7 @@
   xmlns:skia="using:SkiaSharp.Views.Windows"
   xmlns:local="using:HisouSangokushiZero2_1_Uno.Pages"
   xmlns:code="using:HisouSangokushiZero2_1_Uno.Code"
-	HorizontalAlignment="Stretch" VerticalAlignment="Stretch" UseLayoutRounding="False" Background="#EEFE">
+	HorizontalAlignment="Stretch" VerticalAlignment="Stretch" UseLayoutRounding="False">
   <Grid	x:Name="ContentGrid" MaxWidth="{x:Bind local:Game.initContentGridMaxWidth}">
     <Grid.RowDefinitions>
       <RowDefinition/>

@@ -2,7 +2,6 @@
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
 namespace HisouSangokushiZero2_1_Uno.Pages;
-
 internal sealed partial class ProductionInfo : UserControl {
   private enum ProductionInfoState { UpdateNote, AdditionalNote };
   private static readonly Dictionary<ProductionInfoState, UserControl> productionInfoStateMap = [];
