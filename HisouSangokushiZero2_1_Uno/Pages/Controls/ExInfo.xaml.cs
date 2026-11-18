@@ -1,12 +1,13 @@
 ﻿using HisouSangokushiZero2_1_Uno.Code;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.Linq;
 namespace HisouSangokushiZero2_1_Uno.Pages;
 internal sealed partial class ExInfo:UserControl {
-  private enum ExInfoState { Option, Explain, FillDream, PersonList, CountryList, ProductionInfo };
-  private static readonly Dictionary<ExInfoState,UserControl> exInfoStateMap = [];
+  internal enum ExInfoState { Option, Explain, FillDream, PersonList, CountryList, ProductionInfo };
+  internal static readonly Dictionary<ExInfoState,UserControl> exInfoStateMap = [];
   internal ExInfo() {
     InitializeComponent();
     MyInit(this);
@@ -33,7 +34,7 @@ internal sealed partial class ExInfo:UserControl {
             new(ExInfoState.CountryList,CountryListButton),
             new(ExInfoState.ProductionInfo,ProductionInfoButton)
           ]);
-          buttonMap.ToList().ForEach(v => v.Value.Background = v.Key == newState ? Colors.LightGray : Colors.WhiteSmoke);
+          buttonMap.ToList().ForEach(v => v.Value.Background = new SolidColorBrush(v.Key == newState ? Colors.LightGray : Colors.WhiteSmoke));
         }
         void ChangeContentView() {
           if (exInfoStateMap.GetValueOrDefault(newState) is UserControl elem) {

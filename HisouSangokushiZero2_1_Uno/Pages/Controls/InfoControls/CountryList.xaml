@@ -28,7 +28,7 @@
     <StackPanel Grid.Row="0">
       <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
         <TextBlock Text="表示シナリオ：" VerticalAlignment="Center"/>
-        <ComboBox Width="200" Height="40" x:Name="ScenarioComboBox"/>
+        <ComboBox x:Name="ScenarioComboBox" Width="200" Height="40"/>
       </StackPanel>
       <StackPanel MaxWidth="{x:Bind local:CountryList.itemsRepeaterWidth}" Orientation="Horizontal" Background="#EEE">
         <TextBlock Text="陣営" Width="50" TextAlignment="Center"/>

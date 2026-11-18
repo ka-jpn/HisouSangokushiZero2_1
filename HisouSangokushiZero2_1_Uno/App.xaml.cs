@@ -11,7 +11,6 @@ public partial class App:Application {
   /// </summary>
   public App() {
     InitializeComponent();
-    Uno.UI.FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///Assets/Fonts/SourceHanSansJP-Medium.woff2";//add code:set defaultFont
   }
   protected Window? MainWindow { get; private set; }
   protected override async void OnLaunched(LaunchActivatedEventArgs args) {

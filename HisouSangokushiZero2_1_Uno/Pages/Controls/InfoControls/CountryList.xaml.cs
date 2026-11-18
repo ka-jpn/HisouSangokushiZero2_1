@@ -22,13 +22,12 @@ internal sealed partial class CountryList:UserControl {
         page.SizeChanged += (_, _) => ResizeElem();
         CountryScroll.SizeChanged += (_, _) => CountryItemsRepeater.Width = CountryScroll.RenderSize.Width;
         void ResizeElem() {
-          double pageWidth = RenderSize.Width;
           double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;
-          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*Game.uiScale)));
         }
       }
       void SetUIElements() {
+        SetComboBoxFontSize(UIUtil.uiScale);
         ScenarioBase.GetScenarioIds().Select(v => v.Value).ToList().ForEach(ScenarioComboBox.Items.Add);
         LoadScenarioData(0);
         ScenarioComboBox.SelectedIndex = 0;
@@ -48,4 +47,5 @@ internal sealed partial class CountryList:UserControl {
       }
     }
   }
+  internal void SetComboBoxFontSize(double uiScale)=>ScenarioComboBox.ItemContainerStyle=UIUtil.GetComboBoxItemStyle().MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*uiScale)));
 }

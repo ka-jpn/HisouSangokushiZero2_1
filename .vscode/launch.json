@@ -2,18 +2,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Wasm Debug, .net10",
+      "name": "WasmDebug",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5000",
       "webRoot": "${workspaceFolder}/HisouSangokushiZero2_1_Uno",
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
       "timeout": 30000,
-      "preLaunchTask": "build-wasm(net10.0)",
+      "preLaunchTask": "build-wasm",
       "server": {
         "runtimeExecutable": "dotnet",
         "program": "run",
-        "args": ["--no-build","-f","net10.0-browserwasm","--launch-profile", "HisouSangokushiZero2_1_Uno (WebAssembly)"],
+        "args": ["--no-build","-f","net11.0-browserwasm","--launch-profile", "HisouSangokushiZero2_1_Uno (WebAssembly)"],
         "outputCapture": "std",
         "timeout": 30000,
         "cwd": "${workspaceFolder}/HisouSangokushiZero2_1_Uno"

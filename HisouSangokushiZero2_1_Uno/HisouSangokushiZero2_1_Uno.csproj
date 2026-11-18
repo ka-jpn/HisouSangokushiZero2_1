@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0-browserwasm</TargetFrameworks>
+    <TargetFrameworks>net11.0-browserwasm</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>    
     <!-- Display name -->
@@ -8,21 +8,17 @@
     <!-- App Identifier -->
     <ApplicationId>karintougames.HisouSangokushiZero2_1_Uno</ApplicationId>
     <!-- Versions -->
-    <ApplicationDisplayVersion>1.24</ApplicationDisplayVersion>
-    <ApplicationVersion>1.24</ApplicationVersion>
+    <ApplicationDisplayVersion>1.25</ApplicationDisplayVersion>
+    <ApplicationVersion>1.25</ApplicationVersion>
     <!-- Package Publisher -->
     <ApplicationPublisher>かりんとう</ApplicationPublisher>
     <!-- Package Description -->
     <Description>HisouSangokushiZero2_1 powered by Uno Platform.</Description>
     <WasmShellWebAppBasePath>./</WasmShellWebAppBasePath>
-    <DefaultLanguage>ja</DefaultLanguage>
-    <PackageCertificateThumbprint>5956E064D89E03046852D192A86E07739DF29AD5</PackageCertificateThumbprint>
-    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
     <UnoFeatures>
-      SkiaRenderer;
       Svg;
     </UnoFeatures>
-     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MessagePack" />

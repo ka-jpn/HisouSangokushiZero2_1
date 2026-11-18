@@ -16,6 +16,7 @@ public sealed partial class Main:Page {
   private void ToGamePage() => Content.MySetChildren([new Game()]);
   private void RefreshHeaderHeight() {
     HeaderPadding.Height = UIUtil.viewMode == UIUtil.ViewMode.fix ? 100 : 0;
-    ((Action)(UIUtil.viewMode == UIUtil.ViewMode.fix ? JsInterop.FixBody : JsInterop.FitBody)).Invoke();
+    if (!OperatingSystem.IsBrowser()) throw new PlatformNotSupportedException();
+    if (UIUtil.viewMode == UIUtil.ViewMode.fix) JsInterop.FixBody(); else JsInterop.FitBody();
   }
 }

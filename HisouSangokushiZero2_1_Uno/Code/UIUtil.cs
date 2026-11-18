@@ -38,6 +38,7 @@ internal static class UIUtil {
   internal static readonly Thickness dataMargin = new(1);
   internal static double mapZoomLevel = 0;
   internal static double infoTextZoomLevel = 0;
+  internal static  double uiScale = 1;
   internal static StackPanel? headerPadding = null;
   internal static ViewMode viewMode = ViewMode.fix;
   internal static List<Action> ChangeMapScaleActions = [];
@@ -46,8 +47,9 @@ internal static class UIUtil {
   internal static List<Action> SaveGameActions = [];
   internal static List<Action> LoadGameActions = [];
   internal static List<Action> InitGameActions = [];
+  internal static Style GetComboBoxItemStyle() => new Style(typeof(ComboBoxItem)).MyApply(v=>v.BasedOn=Application.Current.Resources.TryGetValue(typeof(ComboBoxItem),out var baseStyle).MyPipe(isGet=>isGet?baseStyle as Style:null));
   internal static TextBlock[] CreateWithShadow(Func<TextBlock> createTextBlock, double shadowWidth, Windows.UI.Color shadowColor, int shadowCount = 8) {
-    return [.. CreateShadowTranslates(shadowWidth, shadowCount).Select(margin => createTextBlock().MyApply(v => v.RenderTransform = margin).MyApply(v => v.Foreground = shadowColor)), createTextBlock()];
+    return [.. CreateShadowTranslates(shadowWidth, shadowCount).Select(margin => createTextBlock().MyApply(v => v.RenderTransform = margin).MyApply(v => v.Foreground = new SolidColorBrush(shadowColor))), createTextBlock()];
     static List<TranslateTransform> CreateShadowTranslates(double shadowWidth, int shadowCount) => [.. Enumerable.Range(0, shadowCount).Select(i => 2 * Math.PI / shadowCount * i).Select(angle => new TranslateTransform() { X = Math.Cos(angle) * shadowWidth, Y = Math.Sin(angle) * shadowWidth })];
   }
   internal static double SolveMapScale(double height,Windows.Foundation.Size size) {

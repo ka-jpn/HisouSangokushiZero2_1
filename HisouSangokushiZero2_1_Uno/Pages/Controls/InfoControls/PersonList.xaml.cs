@@ -34,14 +34,13 @@ internal sealed partial class PersonList:UserControl {
         page.SizeChanged += (_, _) => ResizeElem();
         PersonScroll.SizeChanged += (_, _) => PersonItemsRepeater.Width = PersonScroll.RenderSize.Width;
         void ResizeElem() {
-          double pageWidth = RenderSize.Width;
           double contentWidth = RenderSize.Width - 5;
           ContentPanel.Width = contentWidth;
           SortButtonPanel.Children.OfType<Button>().ToList().ForEach(v => v.Width = contentWidth / 4 - 5 * 2);
-          ScenarioComboBox.ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*Game.uiScale)));
         }
       }
       void SetUIElements() {
+        SetComboBoxFontSize(UIUtil.uiScale);
         ScenarioBase.GetScenarioIds().Select(v => v.Value).ToList().ForEach(ScenarioComboBox.Items.Add);
         LoadScenarioData(0);
         ScenarioComboBox.SelectedIndex = 0;
@@ -68,7 +67,7 @@ internal sealed partial class PersonList:UserControl {
       }
       void RefreshSortButtonPanelColor(StackPanel buttonPanel, SortButtonKind buttonKind) {
         buttonActionMap.Keys.MyGetIndex(v => v == buttonKind)?.MyApply(index => RefreshColor([.. buttonPanel.Children.OfType<Button>()], index));
-        static void RefreshColor(List<Button> elems, int index) => elems.ForEachWithIndex((v, i) => v.Background = i == index ? Colors.LightGray : Colors.WhiteSmoke);
+        static void RefreshColor(List<Button> elems, int index) => elems.ForEachWithIndex((v, i) => v.Background = new SolidColorBrush(i == index ? Colors.LightGray : Colors.WhiteSmoke));
       }
       List<PersonListData> GetPersonListData(ScenarioData scenario, SortButtonKind buttonKind) {
         return [.. buttonActionMap.GetValueOrDefault(buttonKind)?.Invoke(scenario.PersonMap.ToDictionary()).Select(ToPersonListItem) ?? []];
@@ -78,4 +77,5 @@ internal sealed partial class PersonList:UserControl {
       }
     }
   }
+  internal void SetComboBoxFontSize(double uiScale)=>ScenarioComboBox.ItemContainerStyle=UIUtil.GetComboBoxItemStyle().MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*uiScale)));
 }

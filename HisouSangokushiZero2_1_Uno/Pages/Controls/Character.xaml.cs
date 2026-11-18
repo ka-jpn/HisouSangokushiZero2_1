@@ -119,6 +119,6 @@ internal sealed partial class Character:UserControl {
         } ]
       }
     ));
-    ButtonMargin.Width = padding * scaleFactor;
+    ButtonMargin.Width = new(padding * scaleFactor);
   }
 }

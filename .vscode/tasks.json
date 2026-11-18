@@ -2,27 +2,27 @@
   "version": "2.0.0",
   "tasks": [
         {
-      "label": "build-wasm(net10.0)",
+      "label": "build-wasm",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
         "${workspaceFolder}/HisouSangokushiZero2_1_Uno/HisouSangokushiZero2_1_Uno.csproj",
         "/property:GenerateFullPaths=true",
-        "/property:TargetFramework=net10.0-browserwasm",
+        "/property:TargetFramework=net11.0-browserwasm",
         "/consoleloggerparameters:NoSummary"
       ],
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "publish-wasm(net10.0)",
+      "label": "publish-wasm",
       "command": "dotnet",
       "type": "process",
       "args": [
         "publish",
         "${workspaceFolder}/HisouSangokushiZero2_1_Uno/HisouSangokushiZero2_1_Uno.csproj",
         "/property:GenerateFullPaths=true",
-        "/property:TargetFramework=net10.0-browserwasm",
+        "/property:TargetFramework=net11.0-browserwasm",
         "/property:PublishTrimmed=true",
         "/property:WasmShellILLinkerEnabled=true",
         "/consoleloggerparameters:NoSummary"

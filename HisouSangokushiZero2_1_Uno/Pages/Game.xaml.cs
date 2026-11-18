@@ -35,7 +35,6 @@ internal sealed partial class Game:Page {
   private (Panel panel, PersonId person)? pick = null;
   private double lastScaleFactor = double.NaN;
   private double mapScale = 1;
-  internal static double uiScale = 1;
   internal static readonly double initContentGridMaxWidth = UIUtil.GetContentMaxWidth();
   internal Game() {
     InitializeComponent();
@@ -99,7 +98,7 @@ internal sealed partial class Game:Page {
         });
       }
       void AttachEvent(Game page) {
-        MainGrid.SizeChanged += (_, _) => ResizeMap();
+        MainGrid.SizeChanged += (_, _) => { ResizeMap(); ResizeUI(); };
         InfoFramePanel.SizeChanged += (_, _) => ResizeInfoFrame();
         InfoContentPanel.SizeChanged += (_, _) => ResizeInfoContent();
         OpenLogButton.Click += (_,_) => { UIUtil.ReverseVisibility(GameLogPanel); UIUtil.SetVisibility(ExInfoPanel, false); };
@@ -110,16 +109,12 @@ internal sealed partial class Game:Page {
       }
       void ResizeMap() {
         double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * UIUtil.GetMapZoomFactor();
-        double uiScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
-        StateInfo.ResizeElem(StateInfoPanel, uiScaleFactor, mapScaleFactor);
-        HegemonyPoint.ResizeElem(HegemonyPointPanel, uiScaleFactor, mapScaleFactor);
         RelayoutCountryPostUI(mapScaleFactor);
         if (mapScaleFactor != lastScaleFactor) {
           RescaleMap(mapScaleFactor);
           lastScaleFactor = mapScaleFactor;
         }
         mapScale = mapScaleFactor;
-        uiScale = uiScaleFactor;
         void RescaleMap(double scaleFactor) {
           ScaleTransform mapScaleTransform = new() { ScaleX = mapScaleFactor, ScaleY = mapScaleFactor };
           CountryPostsPanel.Margin = new(0, 0, MainGrid.RenderSize.Width * (scaleFactor - 1), CountryPostsPanel.Height * (scaleFactor - 1));
@@ -140,6 +135,16 @@ internal sealed partial class Game:Page {
           double PostPanelLeftUnit = (MainGrid.RenderSize.Width / scaleFactor - countryPostPanelWidth) / (countryPostPanelMap.Count - 1);
           countryPostPanelMap.Values.Select((elem, index) => (elem, index)).ToList().ForEach(v => Canvas.SetLeft(v.elem, PostPanelLeftUnit * v.index));
         }
+      }
+      void ResizeUI() {
+        double mapScaleFactor = UIUtil.SolveMapScale(ContentGrid.RenderSize.Height, MainGrid.RenderSize) * UIUtil.GetMapZoomFactor();
+        double uiScaleFactor = UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 });
+        StateInfo.ResizeElem(StateInfoPanel, uiScaleFactor, mapScaleFactor);
+        HegemonyPoint.ResizeElem(HegemonyPointPanel, uiScaleFactor, mapScaleFactor);
+        (ExInfo.exInfoStateMap.GetValueOrDefault(ExInfo.ExInfoState.CountryList) as CountryList)?.SetComboBoxFontSize(uiScaleFactor);
+        (ExInfo.exInfoStateMap.GetValueOrDefault(ExInfo.ExInfoState.FillDream) as FillDreamCondition)?.SetComboBoxFontSize(uiScaleFactor);
+        (ExInfo.exInfoStateMap.GetValueOrDefault(ExInfo.ExInfoState.PersonList) as PersonList)?.SetComboBoxFontSize(uiScaleFactor);
+        UIUtil.uiScale = uiScaleFactor;
       }
       void ResizeInfoFrame() {
         TopSwitchViewModeButton.Margin = new(0, 0, UIUtil.infoFrameWidth * (mapScale - 1), UIUtil.infoFrameWidth * (mapScale - 1));
@@ -209,10 +214,10 @@ internal sealed partial class Game:Page {
         static Line CreateRoadLine(Road road,Point from,Point to) => new() { X1 = from.X,Y1 = from.Y,X2 = to.X,Y2 = to.Y,Stroke = (road.Kind switch { RoadKind.Land => UIUtil.landRoadColor, RoadKind.Water => UIUtil.waterRoadColor }).ToBrush(),StrokeThickness = 5 * Math.Pow(road.Easiness,1.7) / 2 + 10 };
       }
       static AreaElems CreateAreaElems(GameState game,EArea area) {
-        Border areaBackBorder = new() { Width = UIUtil.areaSize.Width,Height = UIUtil.areaSize.Height,CornerRadius = UIUtil.areaCornerRadius,BorderBrush = Colors.Red };
+        Border areaBackBorder = new() { Width = UIUtil.areaSize.Width,Height = UIUtil.areaSize.Height,CornerRadius = UIUtil.areaCornerRadius,BorderBrush = new SolidColorBrush(Colors.Red) };
         TextBlock areaNameText = new() { HorizontalAlignment = HorizontalAlignment.Center,Margin = new(0,2,0,-1) };
-        StackPanel areaDefensePersonPanel = [];
-        StackPanel areaAffairPersonPanel = [];
+        StackPanel areaDefensePersonPanel = new();
+        StackPanel areaAffairPersonPanel = new();
         Post areaDefensePost = new(ERole.Defense,new(area));
         Post areaAffairPost = new(ERole.Affair,new(area));
         TextBlock affairText = new() { HorizontalAlignment = HorizontalAlignment.Center,Margin = new(0,-1) };
@@ -283,39 +288,44 @@ internal sealed partial class Game:Page {
         Phase.PerishEnd or Phase.TurnLimitOverEnd or Phase.WinEnd or Phase.OtherWinEnd => game.MyApply(ShowGameEndLogButtonClick)
       };
     }
-    List<UIElement> ShowSelectScenario(GameState game) => [
-      new Grid().MySetChildren([
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,0)),
-        new TextBlock { Text=Text.ScenarioCaptionText(),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,1)),
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,2)),
-        new ComboBox {
-          Width=100, VerticalAlignment=VerticalAlignment.Stretch,
-          SelectedIndex=ScenarioBase.GetScenarioIds().MyGetIndex(v=>v==game.NowScenario)??0,
-          Foreground=Colors.Black, Background=Colors.White, Padding=new(10,0,0,0), Margin=new(0,1),
-          ItemContainerStyle = new Style(typeof(ComboBoxItem)).MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetScaleFactor(MainGrid.RenderSize)))),
-        }.MyApply(elem => ScenarioBase.GetScenarioIds().Select(v=>v.Value).ToList().ForEach(elem.Items.Add)).MyApply(v=>
-          v.SelectionChanged+=(_,_)=>(v.SelectedItem as string)?.MyApply(async text => await InitGame(GetGame.GetInitGameScenario(new(text))))
-        ).MyApply(v=>Grid.SetColumn(v,3)),
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,4)),
-        new TextBlock{ Text=game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(Text.StartYearText),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,5)),
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,6)),
-        new TextBlock{ Text=game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(Text.EndYearText),VerticalAlignment=VerticalAlignment.Center}.MyApply(v=>Grid.SetColumn(v,7)),
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,8)),
-        new TextBlock{ Text=Text.ClickMapAreaText(),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,9)),
-        new StackPanel().MyApply(v=>Grid.SetColumn(v,10)),
-     ]).MyApply(v=>new List<ColumnDefinition>([
-        new() { Width = new GridLength(5, GridUnitType.Star) },
-        new() { Width = GridLength.Auto },
-        new() { Width = new GridLength(1, GridUnitType.Star) },
-        new() { Width = GridLength.Auto },
-        new() { Width = new GridLength(1, GridUnitType.Star) },
-        new() { Width = GridLength.Auto },
-        new() { Width = new GridLength(1, GridUnitType.Star) },
-        new() { Width = GridLength.Auto },
-        new() { Width = new GridLength(1, GridUnitType.Star) },
-        new() { Width = GridLength.Auto },
-        new() { Width = new GridLength(5, GridUnitType.Star) },
-      ]).ForEach(v.ColumnDefinitions.Add))];
+    List<UIElement> ShowSelectScenario(GameState game) {
+      ComboBox comboBox = new ComboBox {
+        Width=120, VerticalAlignment=VerticalAlignment.Stretch,
+        SelectedIndex=ScenarioBase.GetScenarioIds().MyGetIndex(v=>v==game.NowScenario)??0,
+        Foreground=new SolidColorBrush(Colors.Black), Background=new SolidColorBrush(Colors.White), Padding=new(10,0,0,0), Margin=new(0,1)
+      }.MyApply(elem => ScenarioBase.GetScenarioIds().Select(v=>v.Value).ToList().ForEach(elem.Items.Add)).MyApply(v=>
+        v.SelectionChanged+=(_,_)=>(v.SelectedItem as string)?.MyApply(async text => await InitGame(GetGame.GetInitGameScenario(new(text))))
+      );
+      void SetComboBoxFontSize(double scale) =>comboBox.ItemContainerStyle=UIUtil.GetComboBoxItemStyle().MyApply(style=>style.Setters.Add(new Setter(FontSizeProperty,BasicStyle.fontsize*UIUtil.GetInfoTextZoomFactor()*scale)));
+      SetComboBoxFontSize(UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 }));
+      return [
+        new Grid().MySetChildren([
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,0)),
+          new TextBlock { Text=Text.ScenarioCaptionText(),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,1)),
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,2)),
+          comboBox.MyApply(v=>Grid.SetColumn(v,3)),
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,4)),
+          new TextBlock{ Text=game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(Text.StartYearText),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,5)),
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,6)),
+          new TextBlock{ Text=game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.MyPipe(Text.EndYearText),VerticalAlignment=VerticalAlignment.Center}.MyApply(v=>Grid.SetColumn(v,7)),
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,8)),
+          new TextBlock{ Text=Text.ClickMapAreaText(),VerticalAlignment=VerticalAlignment.Center }.MyApply(v=>Grid.SetColumn(v,9)),
+          new StackPanel().MyApply(v=>Grid.SetColumn(v,10)),
+      ]).MyApply(v=>new List<ColumnDefinition>([
+          new() { Width = new GridLength(5, GridUnitType.Star) },
+          new() { Width = GridLength.Auto },
+          new() { Width = new GridLength(1, GridUnitType.Star) },
+          new() { Width = GridLength.Auto },
+          new() { Width = new GridLength(1, GridUnitType.Star) },
+          new() { Width = GridLength.Auto },
+          new() { Width = new GridLength(1, GridUnitType.Star) },
+          new() { Width = GridLength.Auto },
+          new() { Width = new GridLength(1, GridUnitType.Star) },
+          new() { Width = GridLength.Auto },
+          new() { Width = new GridLength(5, GridUnitType.Star) },
+        ]).ForEach(v.ColumnDefinitions.Add)).MyApply(v=>v.SizeChanged+=(_,_)=>SetComboBoxFontSize(UIUtil.GetScaleFactor(ContentGrid.RenderSize with { Height = 0 })))
+      ];
+    }
     static List<UIElement> ShowCountryInfo(GameState game) => [
       new Grid().MySetChildren([
         new StackPanel().MyApply(v=>Grid.SetColumn(v,0)),
@@ -384,7 +394,7 @@ internal sealed partial class Game:Page {
       string okButtonText = Text.PostGameEndLogText();
       Ask.SetElems(AskPanel,title,contents,okButtonText,() => LogButtonClick(game),false);
       static void LogButtonClick(GameState game) {
-        string url = $"https://karintougames.com/siteContents/gameComment.php?caption={BaseData.name.Value} ver.{BaseData.version.Value}&comment={HttpUtility.UrlEncode(string.Join('\n',game.GameLog))}";
+        string url = $"https://ss1.xrea.com/karintougames.s350.xrea.com/honkan/siteContents/gameComment.php?caption={BaseData.name.Value} ver.{BaseData.version.Value}&comment={HttpUtility.UrlEncode(string.Join('\n',game.GameLog))}";
 #if __WASM__
         Uno.Foundation.WebAssemblyRuntime.InvokeJS($"top.location.href='{url}';");
 #else
@@ -409,7 +419,7 @@ internal sealed partial class Game:Page {
               HorizontalAlignment = HorizontalAlignment.Center,VerticalAlignment = VerticalAlignment.Center,
               RenderTransform = new ScaleTransform { ScaleX = Math.Min(1,flagTextMaxWidthForFullWidth / flagTextWidthForFullWidth) * flagTextScale,ScaleY = flagTextScale,CenterY = BasicStyle.fontsize / 2 }
             };
-            Grid flagPole = new() { Width = flagPoleWidth,Height = 55,Background = Colors.White,HorizontalAlignment = HorizontalAlignment.Left,VerticalAlignment = VerticalAlignment.Top };
+            Grid flagPole = new() { Width = flagPoleWidth,Height = 55,Background = new SolidColorBrush(Colors.White),HorizontalAlignment = HorizontalAlignment.Left,VerticalAlignment = VerticalAlignment.Top };
             Grid flagPanel = new() { Width = 60,Height = 38,Background = Country.GetCountryColor(game,attackCountry).ToBrush(),HorizontalAlignment = HorizontalAlignment.Left,VerticalAlignment = VerticalAlignment.Top,RenderTransform = new TranslateTransform{X = flagPoleWidth/2} };
             Microsoft.UI.Xaml.Controls.Image attackImage = new() { Source = Image.GetSvgImageSource("Army",200,200), Width = 65,Height = 55,HorizontalAlignment = HorizontalAlignment.Right };
             return new Grid() { Width = 90,Height = 65 }.MySetChildren([attackImage,flagPole,flagPanel.MySetChildren([flagTextBlock])]);
@@ -499,9 +509,9 @@ internal sealed partial class Game:Page {
     }
   }
   private Grid CreatePersonPutPanel(GameState game,Post post,string backText,StackPanel personPutInnerPanel) {
-    Grid personPutPanel = new() { Width = UIUtil.personPutSize.Width,Height = UIUtil.personPutSize.Height,BorderBrush = GetPostFrameColor(game,post.PostKind.MaybeArea).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth),Background = Colors.Transparent };
+    Grid personPutPanel = new() { Width = UIUtil.personPutSize.Width,Height = UIUtil.personPutSize.Height,BorderBrush = GetPostFrameColor(game,post.PostKind.MaybeArea).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth),Background = new SolidColorBrush(Colors.Transparent) };
     TextBlock personPutBackText = new() {
-      Text = backText,Foreground = Windows.UI.Color.FromArgb(100,100,100,100),HorizontalAlignment = HorizontalAlignment.Center,VerticalAlignment = VerticalAlignment.Center,Margin = new(0,2,0,-2),
+      Text = backText,Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(100,100,100,100)),HorizontalAlignment = HorizontalAlignment.Center,VerticalAlignment = VerticalAlignment.Center,Margin = new(0,2,0,-2),
       RenderTransform = new ScaleTransform() { ScaleX = UIUtil.personPutFontScale,ScaleY = UIUtil.personPutFontScale,CenterX = UIUtil.CalcTextWidthForFullWidth(backText) * BasicStyle.fontsize / 2,CenterY = BasicStyle.fontsize / 2 }
     };
     personPutPanel.PointerEntered += (_,_) => EnterPersonPutPanel(GameData.game,personPutInnerPanel,post);
@@ -509,14 +519,14 @@ internal sealed partial class Game:Page {
     return personPutPanel.MySetChildren([personPutBackText,personPutInnerPanel]);
     void EnterPersonPutPanel(GameState game,StackPanel personPutInnerPanel,Post post) {
       if(game.Phase != Phase.Starting && (post.PostKind.MaybeArea?.MyPipe(area => game.AreaMap.GetValueOrDefault(area)?.Country == game.PlayCountry) ?? true)) {
-        pointerover?.MyApply(v => v.panel.Background = Colors.Transparent);
-        personPutInnerPanel.Background = Windows.UI.Color.FromArgb(150,255,255,255);
+        pointerover?.MyApply(v => v.panel.Background = new SolidColorBrush(Colors.Transparent));
+        personPutInnerPanel.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(150,255,255,255));
         pointerover = (personPutInnerPanel, post);
       }
     }
     void ExitPersonPutPanel(StackPanel personPutInnerPanel) {
       if(pointerover != null) {
-        personPutInnerPanel.Background = Colors.Transparent;
+        personPutInnerPanel.Background = new SolidColorBrush(Colors.Transparent);
         pointerover = null;
       }
     }
@@ -525,7 +535,7 @@ internal sealed partial class Game:Page {
     double minFullWidthLength = 2.25;
     double margin = FontSize * (UIUtil.CalcTextWidthForFullWidth(person.Key.Value) - 2);
     Grid panel = new Grid { Width = UIUtil.personPutSize.Width,Height = UIUtil.personPutSize.Height,Background = Country.GetCountryColor(game,Person.GetPersonCountry(game,person.Key)).ToBrush() }.MySetChildren([
-      new StackPanel { HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Stretch,Background=Windows.UI.Color.FromArgb((byte)(20*Person.GetPersonRank(game,person.Key)),0,0,0) }.MySetChildren([
+      new StackPanel { HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Stretch,Background=new SolidColorBrush(Windows.UI.Color.FromArgb((byte)(20*Person.GetPersonRank(game,person.Key)),0,0,0)) }.MySetChildren([
         GetRankPanel(game,person),
         new TextBlock { Text=person.Key.Value,TextAlignment=TextAlignment.Center,Margin=new(-margin/2,0),RenderTransform=new ScaleTransform{ ScaleX=minFullWidthLength/Math.Max(minFullWidthLength,UIUtil.CalcTextWidthForFullWidth(person.Key.Value))*UIUtil.personNameFontScale,ScaleY=UIUtil.personNameFontScale,CenterX=UIUtil.personPutSize.Width/2+margin/minFullWidthLength  }  }
       ])
@@ -535,9 +545,9 @@ internal sealed partial class Game:Page {
     StackPanel GetRankPanel(GameState game,KeyValuePair<PersonId,PersonData> person) {
       int postRank = Person.CalcRoleRank(game,person.Key,person.Value.Post?.PostRole);
       int personRank = Person.GetPersonRank(game,person.Key);
-      return new StackPanel { Orientation = Orientation.Horizontal,HorizontalAlignment = HorizontalAlignment.Center,RenderTransform = new ScaleTransform() { ScaleX = UIUtil.personRankFontScale,ScaleY = UIUtil.personRankFontScale,CenterX = FontSize / 2 } }.MySetChildren(GetRankTextBlock(game,person.Key,postRank,personRank == postRank));
+      return new StackPanel { Orientation = Orientation.Horizontal,HorizontalAlignment = HorizontalAlignment.Center,RenderTransform = new ScaleTransform{ ScaleX = UIUtil.personRankFontScale,ScaleY = UIUtil.personRankFontScale,CenterX = FontSize / 2 } }.MySetChildren(GetRankTextBlock(game,person.Key,postRank,personRank == postRank));
       static List<UIElement> GetRankTextBlock(GameState game,PersonId person,int rank,bool isMatchRole) => [
-        new TextBlock() { Margin = new(0,-0.2,0,0),Text = rank.ToString(),Foreground = isMatchRole ? Colors.Black : Colors.Red },
+        new TextBlock() { Margin = new(0,-0.2,0,0),Text = rank.ToString(),Foreground = new SolidColorBrush(isMatchRole ? Colors.Black : Colors.Red) },
         .. (isMatchRole?null:new Microsoft.UI.Xaml.Controls.Image() { Source = Image.GetSvgImageSource($"{Person.GetPersonRole(game,person)}",80,80),VerticalAlignment = VerticalAlignment.Top,Width = BasicStyle.textHeight * 0.75,Height = BasicStyle.textHeight * 0.75 }).MyMaybeToList()
       ];
     }
@@ -574,20 +584,20 @@ internal sealed partial class Game:Page {
           CreatePersonPostPanelElems(game,role)
       ]);
       Button CreateAutoPutPersonButton(GameState game,ERole role) {
-        Button autoPutPersonButton = new Button { Width = UIUtil.personPutSize.Width * 3,VerticalAlignment = VerticalAlignment.Stretch,Background = Windows.UI.Color.FromArgb(100,100,100,100) }.MyApply(v => v.Content = new TextBlock { Text = Text.AutoPutPersonButtonText() });
+        Button autoPutPersonButton = new Button { Width = UIUtil.personPutSize.Width * 3,VerticalAlignment = VerticalAlignment.Stretch,Background = new SolidColorBrush(Windows.UI.Color.FromArgb(100,100,100,100)) }.MyApply(v => v.Content = new TextBlock { Text = Text.AutoPutPersonButtonText() });
         autoPutPersonButton.Click += (_,_) => GameData.game = AutoPutPersonButtonClick(GameData.game);
         return autoPutPersonButton;
         GameState AutoPutPersonButtonClick(GameState game) => game.PlayCountry?.MyPipe(country => Code.Post.GetAutoPutPost(game,country,role)).MyPipe(postMap => UpdateGame.SetPersonPost(game,postMap)).MyApply(UpdateAreaPanels).MyApply(UpdateCountryPosts).MyApply(UpdateCountryInfoPanel) ?? game;
       }
       StackPanel CreatePersonHeadPostPanel(GameState game,ERole role) {
         return new StackPanel { Orientation = Orientation.Horizontal,BorderBrush = GetPostFrameColor(game,null).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth) }.MySetChildren([
-          .. Enum.GetValues<PostHead>().Select(v=> new Post(role,new(v)).MyPipe(post=> CreatePersonPutPanel(game,post,Text.PlayerCountryPostText(post.PostKind),playerCountryPostPersonPanel.GetValueOrDefault(post)??[]))),
-          ]);
+          .. Enum.GetValues<PostHead>().Select(v=> new Post(role,new(v)).MyPipe(post=> CreatePersonPutPanel(game,post,Text.PlayerCountryPostText(post.PostKind),playerCountryPostPersonPanel.GetValueOrDefault(post)??new()))),
+        ]);
       }
       StackPanel CreatePersonPostPanelElems(GameState game,ERole role) {
         return new StackPanel { BorderBrush = GetPostFrameColor(game,null).ToBrush(),BorderThickness = new(UIUtil.postFrameWidth) }.MySetChildren([.. Enumerable.Range(0,UIUtil.capitalPieceRowNum).Select(row => GetPersonPostLinePanel(game,role,row,game.PersonMap.Where(v => Person.GetPersonCountry(game,v.Key) == game.PlayCountry).ToDictionary()))]);
         StackPanel GetPersonPostLinePanel(GameState game,ERole role,int rowNo,Dictionary<PersonId,PersonData> personMap) => new StackPanel { Orientation = Orientation.Horizontal }.MySetChildren([
-          .. Enumerable.Range(0,UIUtil.capitalPieceColumnNum).Select(i => new Post(role,new(rowNo * UIUtil.capitalPieceColumnNum + i)).MyPipe(post=> CreatePersonPutPanel(game,post,Text.PlayerCountryPostText(post.PostKind),playerCountryPostPersonPanel.GetValueOrDefault(post) ?? [])))
+          .. Enumerable.Range(0,UIUtil.capitalPieceColumnNum).Select(i => new Post(role,new(rowNo * UIUtil.capitalPieceColumnNum + i)).MyPipe(post=> CreatePersonPutPanel(game,post,Text.PlayerCountryPostText(post.PostKind),playerCountryPostPersonPanel.GetValueOrDefault(post)??new())))
         ]);
       }
     }
@@ -601,7 +611,7 @@ internal sealed partial class Game:Page {
     TimeSpan startAnimationDelay = TimeSpan.FromSeconds(6);
     int transparentFrameCount = 60;
     StackPanel panel = new StackPanel() {
-      Background = Windows.UI.Color.FromArgb(187,255,255,255),Height = game.TurnNewLog.Count * BasicStyle.textHeight,IsHitTestVisible = false
+      Background = new SolidColorBrush(Windows.UI.Color.FromArgb(187,255,255,255)),Height = game.TurnNewLog.Count * BasicStyle.textHeight,IsHitTestVisible = false
     }.MySetChildren([.. game.TurnNewLog.Select(logText => new TextBlock() { Text = logText })]);
     game.TurnNewLog.Clear();
     TurnLogPanel.Children.Add(panel);
@@ -625,7 +635,7 @@ internal sealed partial class Game:Page {
     int transparentFrameCount = 60;
     double shadowWidth = 0.7;
     Dictionary<string,bool?> fillDreamConditionMap = game.PlayCountry?.MyPipe(v => game.NowScenario?.MyPipe(ScenarioBase.GetScenarioData)?.FillDreamConditionMap.GetValueOrDefault(v))?.ProgressExplainFunc(game) ?? [];
-    StackPanel panel = new StackPanel() { Background = Windows.UI.Color.FromArgb(187,255,255,255),IsHitTestVisible = false }.MySetChildren([
+    StackPanel panel = new StackPanel() { Background = new SolidColorBrush(Windows.UI.Color.FromArgb(187,255,255,255)),IsHitTestVisible = false }.MySetChildren([
       new TextBlock() { Text = Text.FillDreamConditionCaptionText(game) },
       .. fillDreamConditionMap.Select(fillDreamCondition => new StackPanel(){ Orientation = Orientation.Horizontal }.MySetChildren([
         new Grid(){ Width = BasicStyle.fontsize }.MySetChildren(fillDreamCondition.Value is bool isClearCond ? [..UIUtil.CreateWithShadow(() => CreateFillDreamConditionCheckText(isClearCond),shadowWidth,Colors.Black)]:[]),
@@ -644,11 +654,11 @@ internal sealed partial class Game:Page {
       });
       await Dispatcher.RunAsync(CoreDispatcherPriority.Low,() => TurnFillDreamConditionPanel.Children.Remove(panel));
     });
-    static TextBlock CreateFillDreamConditionCheckText(bool isClear) => new() { Text = isClear ? "✓" : "✗",Foreground = isClear ? Colors.Green : Colors.Red };
+    static TextBlock CreateFillDreamConditionCheckText(bool isClear) => new() { Text = isClear ? "✓" : "×",Foreground = new SolidColorBrush(isClear ? Colors.Green : Colors.Red) };
   }
   private void ShowMessage(string[] messages) {
     StackPanel panel = new StackPanel() {
-      Background = Windows.UI.Color.FromArgb(187,255,255,255),
+      Background = new SolidColorBrush(Windows.UI.Color.FromArgb(187,255,255,255)),
       Height = messages.Length * BasicStyle.textHeight,
       IsHitTestVisible = false
     }.MySetChildren([.. messages.Select(logText => new TextBlock() { Text = logText })]).MyApply(async elem => {

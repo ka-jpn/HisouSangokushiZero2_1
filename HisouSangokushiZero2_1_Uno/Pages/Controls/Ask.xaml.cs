@@ -53,6 +53,6 @@ internal sealed partial class Ask:UserControl {
     Content.Padding = new(padding * scaleFactor);
     TitleDetailMargin.Height = padding * scaleFactor;
     DetailButtonMargin.Height = padding * scaleFactor;
-    ButtonMargin.Width = padding * scaleFactor;
+    ButtonMargin.Width = new(padding * scaleFactor);
   }
 }
